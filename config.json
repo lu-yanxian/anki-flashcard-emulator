@@ -1,0 +1,29 @@
+{
+    "last_deck": "",
+    "content_mode": "templates",
+    "front_field": "",
+    "back_field": "",
+    "search_filter": "",
+    "one_card_per_note": true,
+    "include_suspended": false,
+    "study": {
+        "shuffle": false,
+        "start_side": "front",
+        "track_progress": true,
+        "starred_only": false,
+        "front_size": 180,
+        "back_size": 140,
+        "mode": "flashcards",
+        "match_pairs": 6,
+        "choose_on_open": true,
+        "autoplay_audio": false,
+        "learn_types": "both",
+        "any_line": true,
+        "auto_advance": true,
+        "tag_still_learning": false,
+        "theme": "classic",
+        "effects": {},
+        "sapporo_dark": false
+    },
+    "tag_name": "quizlet::still-learning"
+}

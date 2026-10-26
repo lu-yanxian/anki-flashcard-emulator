@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+meta.json
+*.ankiaddon
+
+# your own saved data (stars, sessions, history...): keep only the folder's README
+user_files/*
+!user_files/README.txt

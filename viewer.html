@@ -1,0 +1,291 @@
+<div id="qz" class="qz">
+  <div class="qz-atmos" aria-hidden="true"><i></i><i></i><i></i></div>
+  <header class="qz-top">
+    <h1 class="qz-deck" id="qzDeck"></h1>
+    <div class="qz-modes" role="tablist" aria-label="Study mode">
+      <button role="tab" id="qzModeCards" data-mode="flashcards" aria-selected="true" title="Flashcards (F)">Flashcards</button>
+      <button role="tab" id="qzModeLearn" data-mode="learn" aria-selected="false" title="Learn (L)">Learn</button>
+      <button role="tab" id="qzModeWrite" data-mode="write" aria-selected="false" title="Write (W)">Write</button>
+      <button role="tab" id="qzModeMatch" data-mode="match" aria-selected="false" title="Match (M)">Match</button>
+    </div>
+    <div class="qz-top-right">
+    <button class="qz-btn qz-btn-quiet" id="qzCardsBtn" title="Choose cards (C)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="13" height="15" rx="2"/><path d="M7.5 5V4a1.5 1.5 0 0 1 1.5-1.5h10A1.5 1.5 0 0 1 20.5 4v13a1.5 1.5 0 0 1-1.5 1.5h-2.5"/><path d="M7 12.5l2 2 4-4"/></svg>
+      <span id="qzCardsBtnText">Cards</span>
+    </button>
+    <button class="qz-btn qz-btn-quiet" id="qzOptionsBtn" aria-expanded="false" aria-controls="qzOptions" title="Options (O)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+      <span>Options</span>
+    </button>
+    </div>
+  </header>
+  <div class="qz-progress" aria-hidden="true"><div class="qz-progress-fill" id="qzProgress"></div><div class="qz-progress-learn" id="qzProgressLearn"></div></div>
+
+  <main class="qz-stage" id="qzStage">
+    <div class="qz-tally" id="qzTally">
+      <span class="qz-tally-learning"><b id="qzLearningCount">0</b> Still learning</span>
+      <span class="qz-counter" id="qzCounter" aria-live="polite"></span>
+      <span class="qz-tally-know">Know <b id="qzKnowCount">0</b></span>
+    </div>
+
+    <div class="qz-deckarea" id="qzDeckArea">
+    <div class="qz-stack" id="qzStack" aria-hidden="true"><i></i><i></i></div>
+    <div class="qz-shell" id="qzShell">
+      <div class="qz-flipper" id="qzFlipper" role="button" tabindex="0" aria-label="Flashcard. Press space to flip.">
+        <section class="qz-face qz-front">
+          <div class="qz-face-bar">
+            <span class="qz-side" id="qzFrontLabel"></span>
+            <div class="qz-face-tools">
+              <button class="qz-icon qz-audio" data-side="front" title="Play audio (R)" aria-label="Play audio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6L8 10z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+              <button class="qz-icon qz-edit" title="Edit in Browse (E)" aria-label="Edit note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button>
+              <button class="qz-icon qz-star" title="Star (S)" aria-label="Star card" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9l-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z"/></svg></button>
+            </div>
+          </div>
+          <div class="qz-face-body"><div class="qz-host" id="qzFrontHost"></div></div>
+        </section>
+        <section class="qz-face qz-back">
+          <div class="qz-face-bar">
+            <span class="qz-side" id="qzBackLabel"></span>
+            <div class="qz-face-tools">
+              <button class="qz-icon qz-audio" data-side="back" title="Play audio (R)" aria-label="Play audio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6L8 10z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+              <button class="qz-icon qz-edit" title="Edit in Browse (E)" aria-label="Edit note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button>
+              <button class="qz-icon qz-star" title="Star (S)" aria-label="Star card" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9l-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z"/></svg></button>
+            </div>
+          </div>
+          <div class="qz-face-body"><div class="qz-host" id="qzBackHost"></div></div>
+        </section>
+      </div>
+      <div class="qz-verdict" aria-hidden="true">
+        <span class="qz-verdict-learning"><b><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>Still learning</b></span>
+        <span class="qz-verdict-know"><b><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>Know</b></span>
+      </div>
+      <p class="qz-hint" id="qzHint" aria-hidden="true">Click the card or press Space to flip</p>
+    </div>
+    </div>
+
+    <div class="qz-end" id="qzEnd" hidden>
+      <h2 id="qzEndTitle"></h2>
+      <p id="qzEndText"></p>
+      <div class="qz-end-bar" id="qzEndBar" hidden aria-hidden="true"><i class="qz-end-bar-know" id="qzEndBarKnow"></i><i class="qz-end-bar-learning" id="qzEndBarLearning"></i></div>
+      <div class="qz-end-stats" id="qzEndStats" hidden>
+        <div class="qz-stat qz-stat-know"><b id="qzEndKnow">0</b><span>Know</span></div>
+        <div class="qz-stat qz-stat-learning"><b id="qzEndLearning">0</b><span>Still learning</span></div>
+      </div>
+      <div class="qz-end-actions" id="qzEndActions"></div>
+    </div>
+    <section class="qz-match" id="qzMatch" hidden aria-label="Match game">
+      <div class="qz-match-bar">
+        <div class="qz-timer-wrap">
+          <span class="qz-timer" id="qzTimer">0.0</span>
+          <span class="qz-penalty" id="qzPenalty" aria-hidden="true">+1 second</span>
+        </div>
+        <span class="qz-pairs-left" id="qzPairsLeft"></span>
+      </div>
+      <div class="qz-grid" id="qzGrid"></div>
+      <div class="qz-match-panel" id="qzMatchPanel">
+        <h2 id="qzMatchTitle"></h2>
+        <p id="qzMatchText"></p>
+        <p class="qz-match-best" id="qzMatchBest"></p>
+        <div class="qz-end-actions" id="qzMatchActions"></div>
+        <div class="qz-match-history" id="qzMatchHistory" hidden></div>
+      </div>
+    </section>
+    <section class="qz-select" id="qzSelect" hidden aria-labelledby="qzSelTitle">
+      <div class="qz-select-head">
+        <h2 id="qzSelTitle">Choose cards</h2>
+        <span class="qz-select-count" id="qzSelCount" aria-live="polite"></span>
+      </div>
+      <div class="qz-select-tools">
+        <input type="search" id="qzSelFilter" placeholder="Filter by text on either side" aria-label="Filter cards by text">
+        <label class="qz-chip"><input type="checkbox" id="qzSelOnly"><span>Selected only</span></label>
+      </div>
+      <div class="qz-select-actions">
+        <button class="qz-btn qz-btn-soft" id="qzAdd10">Add 10</button>
+        <button class="qz-btn qz-btn-soft" id="qzAdd20">Add 20</button>
+        <button class="qz-btn qz-btn-soft" id="qzAddStarred">Add starred</button>
+        <button class="qz-btn qz-btn-soft" id="qzAddTrouble" title="Cards you've missed at least twice and haven't got right three times in a row since">Add trouble cards</button>
+        <button class="qz-btn qz-btn-soft" id="qzAddAll">Add all shown</button>
+        <button class="qz-btn qz-btn-quiet" id="qzClearSel">Clear all</button>
+      </div>
+      <div class="qz-select-list" id="qzSelList" aria-label="Cards in this deck"></div>
+      <div class="qz-select-foot">
+        <span class="qz-select-hint">Add 10 and Add 20 take the next unselected cards in deck order. Shift-click selects a range.</span>
+        <div class="qz-select-buttons">
+          <label class="qz-chip qz-shuffle-chip" title="Study the cards in a random order">
+            <input type="checkbox" id="qzSelShuffle"><span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h3c4 0 6 10 10 10h4M3 17h3c1.6 0 2.8-1.6 3.9-3.6M13.6 9.4C14.6 8.2 15.6 7 17 7h3"/><path d="M18 4l3 3-3 3M18 14l3 3-3 3"/></svg>
+            Shuffle</span>
+          </label>
+          <button class="qz-btn qz-btn-outline" id="qzSelCancel">Cancel</button>
+          <button class="qz-btn qz-btn-primary" id="qzSelApply">Study 0 cards</button>
+        </div>
+      </div>
+    </section>
+    <section class="qz-study" id="qzStudy" hidden aria-label="Learn and Write">
+      <div class="qz-meter" id="qzMeter" aria-live="polite"></div>
+      <div class="qz-q" id="qzQ">
+        <div class="qz-q-card">
+          <div class="qz-face-bar">
+            <span class="qz-side" id="qzQLabel"></span>
+            <div class="qz-face-tools">
+              <button class="qz-icon qz-audio" id="qzQAudio" title="Play audio (Ctrl+R)" aria-label="Play audio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6L8 10z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+              <button class="qz-icon qz-edit" id="qzQEdit" title="Edit in Browse" aria-label="Edit note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button>
+              <button class="qz-icon qz-star" id="qzQStar" title="Star" aria-label="Star card" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9l-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z"/></svg></button>
+            </div>
+          </div>
+          <div class="qz-q-body"><div class="qz-host" id="qzQHost"></div></div>
+        </div>
+        <div class="qz-a" id="qzA">
+          <p class="qz-ask" id="qzAsk"></p>
+          <div class="qz-choices" id="qzChoices"></div>
+          <form class="qz-type" id="qzType" autocomplete="off">
+            <input id="qzTypeInput" type="text" spellcheck="false" autocapitalize="off" aria-label="Your answer">
+            <div class="qz-type-buttons">
+              <button type="button" class="qz-btn qz-btn-quiet" id="qzDontKnow">Don't know</button>
+              <button type="submit" class="qz-btn qz-btn-primary" id="qzTypeSubmit">Answer</button>
+            </div>
+          </form>
+          <div class="qz-feedback" id="qzFeedback" aria-live="polite" hidden></div>
+        </div>
+      </div>
+      <div class="qz-study-panel" id="qzStudyPanel" hidden></div>
+    </section>
+
+    <section class="qz-resume" id="qzResume" hidden aria-labelledby="qzResumeTitle">
+      <h2 id="qzResumeTitle">Pick up where you left off?</h2>
+      <p id="qzResumeText"></p>
+      <div class="qz-end-actions">
+        <button class="qz-btn qz-btn-primary" id="qzResumeGo">Resume</button>
+        <button class="qz-btn qz-btn-outline" id="qzResumeFresh">Start fresh</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="qz-controls">
+    <div class="qz-controls-left">
+      <button class="qz-btn qz-btn-quiet" id="qzUndo" title="Undo (Z)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+        <span>Undo</span>
+      </button>
+    </div>
+    <div class="qz-nav">
+      <button class="qz-round" id="qzPrev" aria-label="Previous card"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button class="qz-round" id="qzNext" aria-label="Next card"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+    <div class="qz-controls-right">
+      <button class="qz-btn qz-btn-quiet qz-toggle" id="qzShuffleBtn" aria-pressed="false" title="Shuffle">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h3c4 0 6 10 10 10h4M3 17h3c1.6 0 2.8-1.6 3.9-3.6M13.6 9.4C14.6 8.2 15.6 7 17 7h3"/><path d="M18 4l3 3-3 3M18 14l3 3-3 3"/></svg>
+        <span>Shuffle</span>
+      </button>
+    </div>
+  </footer>
+
+  <div class="qz-scrim" id="qzScrim" aria-hidden="true"></div>
+  <aside class="qz-options" id="qzOptions" inert aria-label="Options">
+    <div class="qz-options-head">
+      <h2>Options</h2>
+      <button class="qz-icon" id="qzOptionsClose" aria-label="Close options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+
+    <h3 class="qz-opt-head">Theme</h3>
+    <div class="qz-themes" id="qzThemes" role="group" aria-label="Theme"></div>
+    <label class="qz-switch qz-fx-row" id="optFxRow" hidden>
+      <input type="checkbox" id="optFx">
+      <span class="qz-switch-text"><b id="optFxName">Background effect</b><small id="optFxNote"></small></span>
+    </label>
+    <label class="qz-switch qz-fx-row" id="optSapDarkRow" hidden>
+      <input type="checkbox" id="optSapDark">
+      <span class="qz-switch-text"><b>Dark cards</b><small>Ink-dark cards with cream text and a cobalt frame, instead of snow and steel.</small></span>
+    </label>
+
+    <h3 class="qz-opt-head">Flashcards</h3>
+    <label class="qz-switch">
+      <input type="checkbox" id="optTrack">
+      <span class="qz-switch-text"><b>Track progress</b><small>Sort each card into Know or Still learning, then review the ones you missed.</small></span>
+    </label>
+    <h3 class="qz-opt-head">All modes</h3>
+    <label class="qz-switch">
+      <input type="checkbox" id="optStarred">
+      <span class="qz-switch-text"><b>Study starred cards only</b><small id="optStarredNote"></small></span>
+    </label>
+    <label class="qz-switch">
+      <input type="checkbox" id="optChoose">
+      <span class="qz-switch-text"><b>Choose cards when opening</b><small>Start each session on the card picker, with your last selection kept.</small></span>
+    </label>
+    <label class="qz-switch">
+      <input type="checkbox" id="optAutoplay">
+      <span class="qz-switch-text"><b>Play audio automatically</b><small>When a side with audio is shown.</small></span>
+    </label>
+    <label class="qz-switch">
+      <input type="checkbox" id="optShuffle">
+      <span class="qz-switch-text"><b>Shuffle</b></span>
+    </label>
+
+    <fieldset class="qz-segment">
+      <legend>Show first</legend>
+      <label><input type="radio" name="optSide" value="front"><span>Front</span></label>
+      <label><input type="radio" name="optSide" value="back"><span>Back</span></label>
+    </fieldset>
+
+    <div class="qz-range">
+      <label for="optFrontSize">Front text size <output id="optFrontSizeOut"></output></label>
+      <input type="range" id="optFrontSize" min="60" max="500" step="10">
+    </div>
+    <div class="qz-range">
+      <label for="optBackSize">Back text size <output id="optBackSizeOut"></output></label>
+      <input type="range" id="optBackSize" min="60" max="500" step="10">
+    </div>
+    <p class="qz-opt-note">Sizes are remembered for this deck.</p>
+
+    <h3 class="qz-opt-head">Learn and Write</h3>
+    <fieldset class="qz-segment qz-segment-3">
+      <legend>Learn asks with</legend>
+      <label><input type="radio" name="optLearnTypes" value="both"><span>Both</span></label>
+      <label><input type="radio" name="optLearnTypes" value="mc"><span>Choices</span></label>
+      <label><input type="radio" name="optLearnTypes" value="written"><span>Typing</span></label>
+    </fieldset>
+    <label class="qz-switch">
+      <input type="checkbox" id="optAnyLine">
+      <span class="qz-switch-text"><b>Accept any part of the answer</b><small>On busy backs, typing one line or one item of a list such as "a; b" counts. Turn off to require the whole answer.</small></span>
+    </label>
+    <label class="qz-switch">
+      <input type="checkbox" id="optAutoAdvance">
+      <span class="qz-switch-text"><b>Move on after correct answers</b><small>Otherwise wait for Enter after every answer.</small></span>
+    </label>
+
+    <h3 class="qz-opt-head">Match</h3>
+    <fieldset class="qz-segment qz-segment-3">
+      <legend>Pairs per game</legend>
+      <label><input type="radio" name="optPairs" value="4"><span>4</span></label>
+      <label><input type="radio" name="optPairs" value="6"><span>6</span></label>
+      <label><input type="radio" name="optPairs" value="8"><span>8</span></label>
+    </fieldset>
+
+    <h3 class="qz-opt-head">Anki</h3>
+    <label class="qz-switch">
+      <input type="checkbox" id="optTag">
+      <span class="qz-switch-text"><b>Tag cards I'm still learning</b><small id="optTagNote"></small></span>
+    </label>
+
+    <button class="qz-btn qz-btn-outline" id="qzRestart">Restart this mode</button>
+
+    <h3 class="qz-opt-head">Keys</h3>
+    <dl class="qz-keys">
+      <dt>Space</dt><dd>Flip</dd>
+      <dt>↑ ↓</dt><dd>Flip upward / downward</dd>
+      <dt>← →</dt><dd id="keyArrowsText">Previous / next</dd>
+      <dt>Drag</dt><dd id="keyDragText">Drag the card sideways to do the same</dd>
+      <dt>S</dt><dd>Star</dd>
+      <dt>R</dt><dd>Play audio</dd>
+      <dt>E</dt><dd>Edit in Browse</dd>
+      <dt>Z</dt><dd>Undo</dd>
+      <dt>C</dt><dd>Choose cards</dd>
+      <dt>F L W M</dt><dd>Flashcards, Learn, Write, Match</dd>
+      <dt>1–4</dt><dd>Pick a choice in Learn</dd>
+      <dt>Enter</dt><dd>Answer, then continue, in Learn and Write</dd>
+      <dt>O</dt><dd>Options</dd>
+      <dt>T</dt><dd>Next theme</dd>
+    </dl>
+    <p class="qz-fineprint">Studying here never changes Anki's scheduling. The tag above is the only change it can make to your collection, and Anki's Undo reverses it.</p>
+  </aside>
+</div>

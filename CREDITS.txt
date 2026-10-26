@@ -1,0 +1,9 @@
+Anki Flashcard Emulator: credits
+
+Fonts used by the themes (all SIL Open Font License 1.1; licence texts in web/fonts/licenses):
+  Fraunces (Undercase Type), Figtree (Erik Kennedy), Space Grotesk (Florian Karsten),
+  DotGothic16 (Fontworks), EB Garamond (Georg Duffner, Octavio Pardo),
+  IM Fell English (Igino Marini), Shippori Mincho (FONTDASU), Zen Kaku Gothic New (Yoshimichi Ohira).
+  Latin subsets as packaged by Fontsource.
+
+Traditional/simplified Chinese folding table: hanziconv by Bernard Yue (Apache License 2.0).

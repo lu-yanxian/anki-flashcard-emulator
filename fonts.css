@@ -1,0 +1,22 @@
+/* Fonts for the themes, bundled with the add-on (SIL Open Font License, see fonts/licenses). */
+@font-face{font-family:"QZ Fraunces";font-style:normal;font-weight:500;font-display:swap;src:url("__FONTBASE__fraunces-latin-500-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ Fraunces";font-style:normal;font-weight:600;font-display:swap;src:url("__FONTBASE__fraunces-latin-600-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ Figtree";font-style:normal;font-weight:400;font-display:swap;src:url("__FONTBASE__figtree-latin-400-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ Figtree";font-style:normal;font-weight:500;font-display:swap;src:url("__FONTBASE__figtree-latin-500-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ Figtree";font-style:normal;font-weight:600;font-display:swap;src:url("__FONTBASE__figtree-latin-600-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ Figtree";font-style:normal;font-weight:700;font-display:swap;src:url("__FONTBASE__figtree-latin-700-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ Space Grotesk";font-style:normal;font-weight:400;font-display:swap;src:url("__FONTBASE__space-grotesk-latin-400-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ Space Grotesk";font-style:normal;font-weight:500;font-display:swap;src:url("__FONTBASE__space-grotesk-latin-500-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ Space Grotesk";font-style:normal;font-weight:600;font-display:swap;src:url("__FONTBASE__space-grotesk-latin-600-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ Space Grotesk";font-style:normal;font-weight:700;font-display:swap;src:url("__FONTBASE__space-grotesk-latin-700-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ DotGothic16";font-style:normal;font-weight:400;font-display:swap;src:url("__FONTBASE__dotgothic16-latin-400-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ EB Garamond";font-style:normal;font-weight:400;font-display:swap;src:url("__FONTBASE__eb-garamond-latin-400-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ EB Garamond";font-style:normal;font-weight:500;font-display:swap;src:url("__FONTBASE__eb-garamond-latin-500-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ EB Garamond";font-style:normal;font-weight:600;font-display:swap;src:url("__FONTBASE__eb-garamond-latin-600-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ EB Garamond";font-style:normal;font-weight:700;font-display:swap;src:url("__FONTBASE__eb-garamond-latin-700-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ IM Fell English";font-style:normal;font-weight:400;font-display:swap;src:url("__FONTBASE__im-fell-english-latin-400-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ Shippori Mincho";font-style:normal;font-weight:500;font-display:swap;src:url("__FONTBASE__shippori-mincho-latin-500-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ Shippori Mincho";font-style:normal;font-weight:700;font-display:swap;src:url("__FONTBASE__shippori-mincho-latin-700-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ Zen Kaku Gothic New";font-style:normal;font-weight:400;font-display:swap;src:url("__FONTBASE__zen-kaku-gothic-new-latin-400-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ Zen Kaku Gothic New";font-style:normal;font-weight:500;font-display:swap;src:url("__FONTBASE__zen-kaku-gothic-new-latin-500-normal.woff2") format("woff2");}
+@font-face{font-family:"QZ Zen Kaku Gothic New";font-style:normal;font-weight:700;font-display:swap;src:url("__FONTBASE__zen-kaku-gothic-new-latin-700-normal.woff2") format("woff2");}
