@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.9
+
+- **Match, Learn and Write:** for note types whose back shows the front field again (after Anki's divider), the front is now taken out wherever it would give the answer away: Match answer tiles, Learn's answer choices, Write's answer checking, and the question when you study back-to-front. Flipping a card in Flashcards still shows the whole back, front included.
+
 ## v1.8
 
 - **Card picker:** checkboxes now always match the selection. Clicking the box itself, rather than the row, used to leave it showing the opposite.

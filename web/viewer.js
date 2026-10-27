@@ -231,14 +231,56 @@
     return state.ended ? null : cards[state.round[state.pos]];
   }
 
-  function sides(card) {
+  // Some note types show the front field again on the back (after Anki's
+  // divider, so the add-on can't cut it off). That's welcome when you flip a
+  // card, but wherever the back is used as an answer to pick or type, or as
+  // the question, it gives the answer away. answerOnly() is the back with the
+  // front's text taken out, or the back unchanged if the front isn't in it.
+  const answerCache = new Map();
+  const answerParser = new DOMParser();
+  const squash = (t) => (t || "").normalize("NFC").replace(/\s+/g, " ").trim().toLowerCase();
+  function answerOnly(card) {
+    const key = card.q + "\u0000" + card.a;
+    if (answerCache.has(key)) return answerCache.get(key);
+    let out = card.a;
+    const front = squash(answerParser.parseFromString(card.q, "text/html").body.textContent);
+    if (front) {
+      const body = answerParser.parseFromString(card.a, "text/html").body;
+      if (squash(body.textContent).includes(front) && squash(body.textContent) !== front) {
+        // the outermost element holding exactly the front's text, or a bare text line
+        let hit = [...body.querySelectorAll("*")].find((el) =>
+          squash(el.textContent) === front && !(el.parentElement && el.parentElement !== body && squash(el.parentElement.textContent) === front));
+        if (!hit) {
+          const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+          for (let t = walker.nextNode(); t; t = walker.nextNode()) if (squash(t.textContent) === front) { hit = t; break; }
+        }
+        if (hit) {
+          // drop line breaks and rules left next to it, then the front itself
+          for (const dir of ["nextSibling", "previousSibling"]) {
+            let sib = hit[dir];
+            while (sib && ((sib.nodeType === 3 && !sib.textContent.trim()) || (sib.nodeType === 1 && /^(BR|HR)$/.test(sib.tagName)))) {
+              const gone = sib;
+              sib = sib[dir];
+              gone.remove();
+            }
+          }
+          hit.remove();
+          if (squash(body.textContent) || body.querySelector("img")) out = body.innerHTML;
+        }
+      }
+    }
+    answerCache.set(key, out);
+    return out;
+  }
+
+  // quiz: the back is being asked about or chosen from (Learn, Write, Match),
+  // not just revealed after a flip, so it mustn't contain the front
+  function sides(card, quiz) {
     const swap = settings.start_side === "back";
-    return {
-      front: swap ? { html: card.a, label: card.aLabel, audio: card.aAudio, key: "a" }
-                  : { html: card.q, label: card.qLabel, audio: card.qAudio, key: "q" },
-      back:  swap ? { html: card.q, label: card.qLabel, audio: card.qAudio, key: "q" }
-                  : { html: card.a, label: card.aLabel, audio: card.aAudio, key: "a" },
-    };
+    const a = { html: card.a, label: card.aLabel, audio: card.aAudio, key: "a" };
+    const q = { html: card.q, label: card.qLabel, audio: card.qAudio, key: "q" };
+    if (swap || quiz) a.html = answerOnly(card);
+    return swap ? { front: a, back: q } : { front: q, back: a };
   }
 
   // The card's turn in degrees around its horizontal axis. Adding 180 brings
@@ -1173,7 +1215,7 @@
     const seen = new Set();
     const chosen = [];
     for (const i of shuffled(pool)) {
-      const q = normalize(cards[i].q), a = normalize(cards[i].a);
+      const q = normalize(cards[i].q), a = normalize(answerOnly(cards[i]));
       if (!q || !a || q === a || seen.has(q) || seen.has(a)) continue; // keep every tile unambiguous
       seen.add(q); seen.add(a);
       chosen.push(i);
@@ -1284,7 +1326,7 @@
     chosen.forEach((i) => {
       const c = cards[i];
       tiles.push({ card: c, side: "q", html: c.q, scale: settings.front_size * 0.6 });
-      tiles.push({ card: c, side: "a", html: c.a, scale: settings.back_size * 0.6 });
+      tiles.push({ card: c, side: "a", html: answerOnly(c), scale: settings.back_size * 0.6 });
     });
     match.tiles = shuffled(tiles);
     match.pairs = chosen.length;
@@ -1958,7 +2000,7 @@
 
   const api = {
     DATA, cards, settings, stars, els, send, idxById, reduceMotion,
-    saveSettings, saveSession, renderFace, sides, shuffled, button, animate, replay, countUp, bump,
+    saveSettings, saveSession, renderFace, sides: (c) => sides(c, true), shuffled, button, animate, replay, countUp, bump,
     baseOrder, record, unrecord, reorderIds: (ids) =>
       settings.shuffle ? shuffled(ids) : ids.slice().sort((a, b) => idxById.get(a) - idxById.get(b)), sideKey: normalize, toggleStar, nextBatch, batchButton,
     setMode, openPicker,
