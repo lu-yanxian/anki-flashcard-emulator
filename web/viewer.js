@@ -28,7 +28,7 @@
     matchText: $("qzMatchText"), matchBest: $("qzMatchBest"), matchActions: $("qzMatchActions"),
     cardsBtn: $("qzCardsBtn"), cardsBtnText: $("qzCardsBtnText"), optChoose: $("optChoose"),
     select: $("qzSelect"), selCount: $("qzSelCount"), selFilter: $("qzSelFilter"), selOnly: $("qzSelOnly"),
-    add10: $("qzAdd10"), add20: $("qzAdd20"), addStarred: $("qzAddStarred"), addAll: $("qzAddAll"),
+    add5: $("qzAdd5"), add10: $("qzAdd10"), add20: $("qzAdd20"), addStarred: $("qzAddStarred"), addAll: $("qzAddAll"),
     clearSel: $("qzClearSel"), selList: $("qzSelList"), selCancel: $("qzSelCancel"), selApply: $("qzSelApply"),
     addTrouble: $("qzAddTrouble"),
     study: $("qzStudy"), matchHistory: $("qzMatchHistory"),
@@ -1625,7 +1625,11 @@
         '<div class="qz-row-side"><div class="qz-row-host"></div></div>';
       el.addEventListener("click", (e) => {
         e.preventDefault();
-        toggleRow(i, e.shiftKey);
+        const changed = toggleRow(i, e.shiftKey);
+        // A click that lands on the checkbox itself is undone by the browser
+        // once this handler returns (the default action was cancelled), which
+        // left boxes showing the opposite of the selection. Repaint after.
+        setTimeout(() => changed.forEach(paintRow), 0);
       });
       picker.rows.push({ el, box: el.firstChild, num: el.children[1], rendered: false });
       picker.observer.observe(el);
@@ -1677,7 +1681,7 @@
     els.selCount.textContent = n + " of " + cards.length + " selected";
     els.selApply.textContent =
       n === 0 ? "Study all " + cards.length + " cards" : n === 1 ? "Study 1 card" : "Study " + n + " cards";
-    els.add10.disabled = els.add20.disabled = els.addAll.disabled = unselectedShown === 0;
+    els.add5.disabled = els.add10.disabled = els.add20.disabled = els.addAll.disabled = unselectedShown === 0;
     els.addStarred.disabled = !shown.some((i) => stars.has(cards[i].id) && !picker.draft.has(cards[i].id));
     const trouble = shown.filter((i) => isTrouble(cards[i].id) && !picker.draft.has(cards[i].id)).length;
     els.addTrouble.disabled = trouble === 0;
@@ -1710,10 +1714,12 @@
       const range = [];
       for (let k = lo; k <= hi; k++) if (!picker.rows[k].el.hidden) range.push(k);
       setRows(range, on, false);
-    } else {
-      setRows([i], on, false);
+      picker.anchor = i;
+      return range;
     }
+    setRows([i], on, false);
     picker.anchor = i;
+    return [i];
   }
 
   function addNext(n) {
@@ -1763,6 +1769,7 @@
     filterTimer = setTimeout(applyFilter, cards.length > 1500 ? 160 : 0);
   });
   els.selOnly.addEventListener("change", applyFilter);
+  els.add5.addEventListener("click", () => addNext(5));
   els.add10.addEventListener("click", () => addNext(10));
   els.add20.addEventListener("click", () => addNext(20));
   els.addAll.addEventListener("click", () => addNext(Infinity));

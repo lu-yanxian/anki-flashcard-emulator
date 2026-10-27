@@ -15,7 +15,9 @@ from anki.collection import Collection, SearchNode
 from anki.consts import MODEL_CLOZE
 from anki.sound import AV_REF_RE, SoundOrVideoTag
 
-ANSWER_SPLIT_RE = re.compile(r"<hr\s+id\s*=\s*[\"']?answer[\"']?\s*/?>", re.I)
+# Anki's divider between the repeated front and the answer: <hr id=answer>,
+# with or without quotes and possibly with other attributes
+ANSWER_SPLIT_RE = re.compile(r"<hr\b[^>]*?\bid\s*=\s*[\"']?answer\b[^>]*>", re.I)
 SOUND_RE = re.compile(r"\[sound:([^\]]+)\]")
 TYPE_ANS_RE = re.compile(r"\[\[type:(?:(cloze|nc):)?([^\]]*)\]\]")
 CLOZE_RE = re.compile(r"\{\{c\d+::(.*?)(?:::[^}]*)?\}\}", re.S)
@@ -69,6 +71,32 @@ def _clean(col: Collection, html: str) -> str:
     return col.media.escape_media_filenames(html)
 
 
+def _answer_only(answer: str, question: str) -> str:
+    """The back of a card without the front repeated on it.
+
+    Most back templates start with {{FrontSide}} and a divider; everything
+    after the divider is the answer. Templates without the divider still
+    repeat the front, so take it out where it appears. Otherwise Match would
+    show the question on both tiles of a pair, and Flashcards would show it
+    again on the back.
+    """
+    parts = ANSWER_SPLIT_RE.split(answer, maxsplit=1)
+    if len(parts) > 1:
+        return parts[1]
+    q = question.strip()
+    if q and q in answer:
+        rest = answer.replace(q, "", 1)
+        # drop a plain line or rule left between the two halves
+        rest = re.sub(r"^\s*(?:<br\s*/?>|<hr[^>]*>|\s)+", "", rest, flags=re.I)
+        if _visible(rest):
+            return rest
+    return answer
+
+
+def _visible(html: str) -> bool:
+    return bool(re.sub(r"<[^>]+>|&nbsp;|\s", "", html)) or "<img" in html.lower()
+
+
 def _strip_cloze(text: str) -> str:
     return CLOZE_RE.sub(r"\1", text)
 
@@ -98,8 +126,7 @@ def card_payload(
     else:
         out = card.render_output(reload=True)
         q_text = out.question_text
-        parts = ANSWER_SPLIT_RE.split(out.answer_text, maxsplit=1)
-        a_text = parts[1] if len(parts) > 1 else out.answer_text
+        a_text = _answer_only(out.answer_text, q_text)
         q_audio = [out.question_av_tags[i] for i in _av_indices(q_text) if i < len(out.question_av_tags)]
         a_audio = [out.answer_av_tags[i] for i in _av_indices(a_text) if i < len(out.answer_av_tags)]
         q_html = _clean(col, _type_answers(card, q_text, False))

@@ -1,4 +1,5 @@
 {
     "package": "quizlet_emulator",
-    "name": "Anki Flashcard Emulator"
+    "name": "Anki Flashcard Emulator",
+    "human_version": "1.8"
 }

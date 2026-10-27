@@ -17,7 +17,7 @@ Studying here never changes Anki's scheduling. Reviews, due dates and stats stay
 
 ## Choosing cards
 
-The card picker lets you tick individual cards, filter by text, or use **Add 10**, **Add 20**, **Add starred**, **Add trouble cards** (cards you keep missing) and **Add all shown**. Shift-click selects a range. The selection is remembered per deck.
+The card picker lets you tick individual cards, filter by text, or use **Add 5**, **Add 10**, **Add 20**, **Add starred**, **Add trouble cards** (cards you keep missing) and **Add all shown**. Shift-click selects a range. The selection is remembered per deck.
 
 ![The card picker in the Edinburgh theme](docs/picker-edinburgh.png)
 
@@ -59,7 +59,7 @@ Each city theme has an optional background animation, off until you switch it on
 
 ## Install
 
-**From a release:** download the `.ankiaddon` file from the Releases page and open it with Anki (or use *Tools → Add-ons → Install from file…*). Restart Anki.
+**From a release:** download the latest `flashcard_emulator_v….ankiaddon` file and open it with Anki (or use *Tools → Add-ons → Install from file…*). Restart Anki.
 
 **From the source:** copy this folder into Anki's add-ons folder (*Tools → Add-ons → View Files*) as `quizlet_emulator`, then restart Anki. Keeping that folder name means updates replace the add-on in place and keep your saved data.
 
@@ -95,7 +95,7 @@ Stars, card selections, saved sessions, results history, Match times and per-dec
 python3 build_ankiaddon.py
 ```
 
-This writes `flashcard_emulator.ankiaddon` next to the script, leaving out the README, screenshots, your `user_files` data and other files Anki doesn't need.
+This writes `flashcard_emulator_v<version>.ankiaddon` next to the script (the version comes from `human_version` in `manifest.json`), leaving out the README, screenshots, your `user_files` data and other files Anki doesn't need.
 
 ## Credits
 

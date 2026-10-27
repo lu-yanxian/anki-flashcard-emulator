@@ -9,14 +9,18 @@ user_files (only its README is kept, so the folder exists after install).
 
 from __future__ import annotations
 
+import json
 import os
 import zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "flashcard_emulator.ankiaddon")
+# the version comes from manifest.json ("human_version"), e.g. flashcard_emulator_v1.8.ankiaddon
+with open(os.path.join(HERE, "manifest.json"), encoding="utf-8") as _f:
+    VERSION = json.load(_f).get("human_version", "")
+OUT = os.path.join(HERE, f"flashcard_emulator_v{VERSION}.ankiaddon" if VERSION else "flashcard_emulator.ankiaddon")
 
 SKIP_DIRS = {".git", ".github", "__pycache__", "docs"}
-SKIP_FILES = {"build_ankiaddon.py", "README.md", "meta.json", ".gitignore", ".gitattributes"}
+SKIP_FILES = {"build_ankiaddon.py", "README.md", "CHANGELOG.md", "meta.json", ".gitignore", ".gitattributes"}
 
 
 def wanted(rel: str) -> bool:
