@@ -21,6 +21,20 @@ The card picker lets you tick individual cards, filter by text, or use **Add 5**
 
 ![The card picker in the Edinburgh theme](docs/picker-edinburgh.png)
 
+## Statistics
+
+Press **P** or click **Stats** to see how you're doing, for the deck you're studying or across all your decks:
+
+- **Cards learned** in the deck, and how many are still being learned or not studied yet. A card counts as learned once you get it right twice in a row.
+- **Day streak** and how many of the last 30 days you practised.
+- **Time studied**, counted only while you're actively answering.
+- **Accuracy**, an **activity calendar** of the last 26 weeks, cards answered each day for the last two weeks, and a breakdown by mode with your best Match times.
+- With **All decks**, a table of every deck you've studied: cards learned, answers, time and when you last studied it.
+
+You can also open your statistics from Anki's main window with **Tools → Flashcard Emulator Stats…**, without starting a session. Statistics are kept only on your computer, and you can turn them off in **Options**.
+
+![The Stats screen](docs/stats-classic.png)
+
 ## Answer checking
 
 Typed answers are forgiving where it makes sense:
@@ -84,10 +98,11 @@ Tested with Anki 26.09.
 | Enter | Answer, then continue (Learn and Write) |
 | O | Options |
 | T | Next theme |
+| P | Stats |
 
 ## Your data
 
-Stars, card selections, saved sessions, results history, Match times and per-deck text sizes are stored per Anki profile in the add-on's `user_files` folder, which Anki keeps when the add-on is updated. Settings are in the add-on's config (*Tools → Add-ons → Config*); `config.md` describes each one.
+Stars, card selections, saved sessions, results history, statistics, Match times and per-deck text sizes are stored per Anki profile in the add-on's `user_files` folder, which Anki keeps when the add-on is updated. Settings are in the add-on's config (*Tools → Add-ons → Config*); `config.md` describes each one.
 
 ## Building the .ankiaddon
 

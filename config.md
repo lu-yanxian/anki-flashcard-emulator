@@ -11,6 +11,7 @@ Most of these are set from the add-on's own windows, so you rarely need to edit 
 - `study.shuffle`: start rounds in a shuffled order (the Shuffle button in the window does the same).
 - `study.track_progress`: in Flashcards, sort each card into Know or Still learning.
 - `study.starred_only`: study only the cards you've starred.
+- `study.track_stats`: keep statistics (cards answered, time studied, streaks) for the Stats screen. On by default; stored in `user_files/<profile>/stats.json`.
 - `study.mode`: `"flashcards"`, `"learn"`, `"write"` or `"match"`, the mode the window opens in (it remembers the last one you used).
 - `study.front_size` / `study.back_size`: the default text sizes (60–500%) for decks you haven't adjusted. Sizes changed in Options are saved for that deck only (`user_files/<profile>/deck_sizes.json`).
 - `study.start_side`: `"front"` or `"back"`, whichever is shown first. In Learn and Write it's the side you're asked about; you answer with the other one.

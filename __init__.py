@@ -14,6 +14,7 @@ optional "still learning" tag, which you turn on in Options.
 from __future__ import annotations
 
 import copy
+import html
 import json
 import os
 import time
@@ -46,6 +47,7 @@ from aqt.sound import av_player
 from aqt.utils import restoreGeom, saveGeom, showWarning, tooltip
 from aqt.webview import AnkiWebView
 
+from . import stats as qstats
 from .cards import build_search, card_payload, collect_cards
 
 ADDON_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -80,6 +82,7 @@ DEFAULTS: dict[str, Any] = {
         "any_line": True,
         "auto_advance": True,
         "tag_still_learning": False,
+        "track_stats": True,
     },
 }
 
@@ -258,6 +261,30 @@ def load_history() -> dict[str, list]:
 
 def save_history(cards: dict[str, list]) -> None:
     _write_json("history.json", {"cards": cards})
+
+
+# Daily statistics: {"days": {date: {deck id: counters}}} (see stats.py)
+def load_stats() -> dict:
+    days = _read_json("stats.json").get("days", {})
+    return days if isinstance(days, dict) else {}
+
+
+def add_stats(delta: dict) -> None:
+    if not delta:
+        return
+    data = _read_json("stats.json")
+    days = data.get("days") if isinstance(data.get("days"), dict) else {}
+    _write_json("stats.json", {"days": qstats.merge_delta(days, delta)})
+
+
+def stats_for(deck_id: int | None, conf: dict[str, Any]) -> dict:
+    deck_name = mw.col.decks.name_if_exists(deck_id) if deck_id else ""
+    return qstats.build_stats(
+        mw.col, load_stats(), load_history(), deck_id or None,
+        include_suspended=bool(conf.get("include_suspended")),
+        match_best=load_match_best(deck_id, deck_name) if deck_id else None,
+        tracking=bool(conf["study"].get("track_stats", True)),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -450,6 +477,11 @@ class FlashcardViewer(QDialog):
         self._hist_timer.setSingleShot(True)
         qconnect(self._hist_timer.timeout, self._save_history)
 
+        # daily statistics, added up here and written with the history
+        self._stat_delta: dict[str, dict[str, dict]] = {}
+        self._stat_undo: dict[int, tuple] = {}
+        self._session_days: set[str] = set()
+
         # optional "still learning" tag: desired state per note, applied in batches
         self._tag_want: dict[int, bool] = {}
         self._tag_undo: dict[int, Any] = {}
@@ -494,13 +526,14 @@ class FlashcardViewer(QDialog):
             f"<style>{_read_web('fonts/fonts.css').replace('__FONTBASE__', font_base)}</style>"
             f"<style>{_read_web('viewer.css')}</style>"
             f"<style>{_read_web('themes.css')}</style>"
+            f"<style>{_read_web('stats.css')}</style>"
         )
         body = (
             _read_web("viewer.html")
             + f"<script>window.QZ_DATA = {_json_for_script(data)};</script>"
             + "".join(
                 f"<script>{_read_web(name)}</script>"
-                for name in ("hanzi_fold.js", "answers.js", "study.js", "effects.js", "viewer.js")
+                for name in ("hanzi_fold.js", "answers.js", "study.js", "effects.js", "stats.js", "viewer.js")
             )
         )
         self.web.stdHtml(body, css=[], js=[], head=head, context=self, default_css=False)
@@ -556,14 +589,22 @@ class FlashcardViewer(QDialog):
         elif action == "matchtime":
             pairs, _, secs = arg.partition(":")
             add_match_history(self.deck_id, int(pairs), round(float(secs), 1))
+            self._bump(g=1)
+        elif action == "studytime":
+            self._bump(s=min(600.0, max(0.0, float(arg))))
+        elif action == "stats":
+            # "deck": the deck this window studies; "all"; or another deck's id
+            deck = None if arg == "all" else int(arg) if arg.isdigit() else self.deck_id
+            data = stats_for(deck, self.conf)
+            self.web.eval(f"window.qzShowStats && window.qzShowStats({_json_for_script(data)});")
         elif action == "decksize":
             save_deck_sizes(self.deck_id, json.loads(arg))
         elif action == "session":
             save_session(self.deck_id, json.loads(arg) if arg and arg != "null" else None)
         elif action == "result":
-            # result:<cid>:<1 known | 0 missed>:<1 if the tag may come off>
-            cid_s, ok_s, untag_s = (arg.split(":") + ["0", "0"])[:3]
-            self._record(int(cid_s), ok_s == "1", untag_s == "1")
+            # result:<cid>:<1 known | 0 missed>:<1 if the tag may come off>:<mode>
+            cid_s, ok_s, untag_s, mode = (arg.split(":") + ["0", "0", ""])[:4]
+            self._record(int(cid_s), ok_s == "1", untag_s == "1", mode)
         elif action == "unresult":
             self._unrecord(int(arg))
         elif action == "edit":
@@ -573,10 +614,26 @@ class FlashcardViewer(QDialog):
 
     # ---- results history and the optional tag
 
-    def _record(self, cid: int, ok: bool, untag: bool) -> None:
+    def _tracking(self) -> bool:
+        return bool(self.conf["study"].get("track_stats", True))
+
+    def _bump(self, mode: str = "", sign: int = 1, date: str | None = None, **counters: float) -> None:
+        """Add to today's statistics for this deck (written with the history)."""
+        if not self._tracking() or not self.deck_id:
+            return
+        rec = self._stat_delta.setdefault(date or qstats.today(), {}).setdefault(str(self.deck_id), {})
+        for key, n in counters.items():
+            rec[key] = rec.get(key, 0) + sign * n
+        if mode in qstats.MODES:
+            modes = rec.setdefault("m", {})
+            modes[mode] = modes.get(mode, 0) + sign
+        self._hist_timer.start(1500)
+
+    def _record(self, cid: int, ok: bool, untag: bool, mode: str = "") -> None:
         key = str(cid)
         prev = self.history.get(key)
         miss, seen, streak = (prev or [0, 0, 0])[:3]
+        was_learned = streak >= qstats.LEARNED_STREAK
         seen += 1
         if ok:
             streak += 1
@@ -586,6 +643,14 @@ class FlashcardViewer(QDialog):
         self.history[key] = [miss, seen, streak]
         self._hist_undo[cid] = prev
         self._hist_timer.start(1500)
+
+        if self._tracking():
+            day = qstats.today()
+            learned = int(not was_learned and streak >= qstats.LEARNED_STREAK)
+            new_session = day not in self._session_days
+            self._session_days.add(day)
+            self._bump(mode=mode, a=1, c=int(ok), l=learned, n=int(new_session))
+            self._stat_undo[cid] = (day, int(ok), learned, mode)
 
         if self.conf["study"].get("tag_still_learning") and cid in self.cards_by_id:
             nid = self.cards_by_id[cid]["nid"]
@@ -598,6 +663,9 @@ class FlashcardViewer(QDialog):
 
     def _unrecord(self, cid: int) -> None:
         key = str(cid)
+        if cid in self._stat_undo:
+            day, ok, learned, mode = self._stat_undo.pop(cid)
+            self._bump(mode=mode, sign=-1, date=day, a=1, c=ok, l=learned)
         if cid in self._hist_undo:
             prev = self._hist_undo.pop(cid)
             if prev is None:
@@ -618,6 +686,8 @@ class FlashcardViewer(QDialog):
             on_disk = load_history()
             on_disk.update(self.history)  # keep other decks' entries from other windows
             save_history(on_disk)
+            delta, self._stat_delta = self._stat_delta, {}
+            add_stats(delta)
         except OSError:
             pass
 
@@ -696,7 +766,7 @@ class FlashcardViewer(QDialog):
 
     def closeEvent(self, event: Any) -> None:  # noqa: N802 (Qt naming)
         if not self._closed:
-            if self._hist_timer.isActive():
+            if self._hist_timer.isActive() or self._stat_delta:
                 self._hist_timer.stop()
                 self._save_history()
             if self._tag_timer.isActive():
@@ -712,6 +782,121 @@ class FlashcardViewer(QDialog):
         # which used to leave the window open and blank.
         event.accept()
         self.deleteLater()
+
+
+class StatsWindow(QDialog):
+    """Tools > Flashcard Emulator Stats: the Stats screen without a study
+    session, for all decks or any one deck."""
+
+    GEOM_KEY = "quizlet_emulator_stats"
+
+    def __init__(self) -> None:
+        super().__init__(None, Qt.WindowType.Window)
+        self.silentlyClose = True
+        self.setWindowTitle("Flashcard Emulator Stats")
+        self.conf = get_config()
+        self._closed = False
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.web = AnkiWebView(parent=self, title="quizlet_emulator_stats")
+        self.web.set_bridge_command(self.on_bridge, self)
+        layout.addWidget(self.web)
+        self.resize(980, 760)
+        restoreGeom(self, self.GEOM_KEY)
+
+        study = self.conf["study"]
+        theme = study.get("theme") or "classic"
+        city = theme not in ("classic", "classic-dark")
+        night = theme == "classic-dark" or theme == "tokyo" or (theme == "sapporo" and study.get("sapporo_dark"))
+        decks = sorted(
+            ((d.id, d.name) for d in mw.col.decks.all_names_and_ids(skip_empty_default=True, include_filtered=False)),
+            key=lambda x: x[1].lower(),
+        )
+        options = "".join(
+            f'<option value="{did}">{html.escape(name)}</option>' for did, name in decks
+        )
+        font_base = f"/_addons/{mw.addonManager.addonFromModule(MODULE)}/web/fonts/"
+        head = (
+            f"<style>{_read_web('fonts/fonts.css').replace('__FONTBASE__', font_base)}</style>"
+            f"<style>{_read_web('viewer.css')}</style>"
+            f"<style>{_read_web('themes.css')}</style>"
+            f"<style>{_read_web('stats.css')}</style>"
+            "<style>html,body{height:100%;overflow:hidden}</style>"
+        )
+        body = (
+            f'<div id="qz" class="qz qz-statswin{" night" if night else ""}"'
+            + (f' data-theme="{theme}"' if city else "")
+            + '><div class="qz-atmos" aria-hidden="true"><i></i><i></i><i></i></div>'
+            '<div class="qz-stats-top"><h2 id="qzStatsTitle">Stats</h2>'
+            '<select id="qzStatsDeck" aria-label="Deck"><option value="all">All decks</option>'
+            + options
+            + '</select></div><div class="qz-stats-scroll" id="qzStatsBody"></div></div>'
+            + f"<script>{_read_web('stats.js')}</script>"
+            + """<script>
+(function () {
+  var sel = document.getElementById("qzStatsDeck");
+  var root = document.getElementById("qz");
+  document.documentElement.style.background = document.body.style.background = getComputedStyle(root).backgroundColor;
+  function ask() { pycmd("qz:stats:" + sel.value); }
+  sel.addEventListener("change", ask);
+  var got = false;
+  window.qzShowStats = function (d) {
+    got = true;
+    document.getElementById("qzStatsTitle").textContent = d.scope === "all" ? "Stats: all decks" : "Stats: " + d.deckName.split("::").pop();
+    QZ_STATS.render(document.getElementById("qzStatsBody"), d, { onPickDeck: function (id) { sel.value = String(id); ask(); } });
+  };
+  // the link to Anki may not be ready the moment the page loads: ask until it answers
+  (function first(n) {
+    if (got || n > 25) return;
+    setTimeout(function () { first(n + 1); }, 400);
+    try { ask(); } catch (e) { /* pycmd not there yet */ }
+  })(0);
+})();
+</script>"""
+        )
+        self.web.stdHtml(body, css=[], js=[], head=head, context=self, default_css=False)
+        _open_viewers.append(self)
+        self.show()
+        self.activateWindow()
+
+    def on_bridge(self, cmd: str) -> Any:
+        if not cmd.startswith("qz:stats:") or self._closed or not mw.col:
+            return None
+        arg = cmd[len("qz:stats:"):]
+        deck = int(arg) if arg.isdigit() else None
+        data = stats_for(deck, self.conf)
+        self.web.eval(f"window.qzShowStats && window.qzShowStats({_json_for_script(data)});")
+        return None
+
+    def refresh_edited(self) -> None:  # called for every open window; nothing to refresh here
+        pass
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:  # noqa: N802
+        if event.key() == Qt.Key.Key_Escape:
+            self.close()
+            return
+        super().keyPressEvent(event)
+
+    def closeEvent(self, event: Any) -> None:  # noqa: N802
+        if not self._closed:
+            self._closed = True
+            saveGeom(self, self.GEOM_KEY)
+            self.web.cleanup()
+            if self in _open_viewers:
+                _open_viewers.remove(self)
+        event.accept()
+        self.deleteLater()
+
+
+def open_stats() -> None:
+    if not mw.col:
+        return
+    for win in _open_viewers:
+        if isinstance(win, StatsWindow):
+            win.activateWindow()
+            win.raise_()
+            return
+    StatsWindow()
 
 
 # ---------------------------------------------------------------------------
@@ -771,6 +956,8 @@ def setup() -> None:
     mw.addonManager.setWebExports(MODULE, r"web/fonts/.*\.woff2")
     action = mw.form.menuTools.addAction("Flashcard Emulator…")
     qconnect(action.triggered, lambda: open_setup())
+    stats_action = mw.form.menuTools.addAction("Flashcard Emulator Stats…")
+    qconnect(stats_action.triggered, open_stats)
     gui_hooks.deck_browser_will_show_options_menu.append(on_deck_options_menu)
     gui_hooks.operation_did_execute.append(on_operation)
     gui_hooks.profile_will_close.append(on_profile_close)

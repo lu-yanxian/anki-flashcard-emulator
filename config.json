@@ -23,7 +23,8 @@
         "tag_still_learning": false,
         "theme": "classic",
         "effects": {},
-        "sapporo_dark": false
+        "sapporo_dark": false,
+        "track_stats": true
     },
     "tag_name": "quizlet::still-learning"
 }

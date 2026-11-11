@@ -9,6 +9,10 @@
       <button role="tab" id="qzModeMatch" data-mode="match" aria-selected="false" title="Match (M)">Match</button>
     </div>
     <div class="qz-top-right">
+    <button class="qz-btn qz-btn-quiet" id="qzStatsBtn" title="Stats (P)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21.5 20h-19"/></svg>
+      <span>Stats</span>
+    </button>
     <button class="qz-btn qz-btn-quiet" id="qzCardsBtn" title="Choose cards (C)">
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="13" height="15" rx="2"/><path d="M7.5 5V4a1.5 1.5 0 0 1 1.5-1.5h10A1.5 1.5 0 0 1 20.5 4v13a1.5 1.5 0 0 1-1.5 1.5h-2.5"/><path d="M7 12.5l2 2 4-4"/></svg>
       <span id="qzCardsBtnText">Cards</span>
@@ -122,6 +126,19 @@
         </div>
       </div>
     </section>
+    <section class="qz-stats" id="qzStats" hidden aria-labelledby="qzStatsTitle">
+      <div class="qz-stats-top">
+        <h2 id="qzStatsTitle">Stats</h2>
+        <div class="qz-stats-tabs" role="tablist" aria-label="Which statistics">
+          <button role="tab" id="qzStatsDeckTab" aria-selected="true">This deck</button>
+          <button role="tab" id="qzStatsAllTab" aria-selected="false">All decks</button>
+        </div>
+        <span class="spacer"></span>
+        <button class="qz-btn qz-btn-primary" id="qzStatsClose">Back to studying</button>
+      </div>
+      <div class="qz-stats-scroll" id="qzStatsBody"></div>
+    </section>
+
     <section class="qz-study" id="qzStudy" hidden aria-label="Learn and Write">
       <div class="qz-meter" id="qzMeter" aria-live="polite"></div>
       <div class="qz-q" id="qzQ">
@@ -262,6 +279,12 @@
       <label><input type="radio" name="optPairs" value="8"><span>8</span></label>
     </fieldset>
 
+    <h3 class="qz-opt-head">Statistics</h3>
+    <label class="qz-switch">
+      <input type="checkbox" id="optStats">
+      <span class="qz-switch-text"><b>Keep statistics</b><small>Record how much you practise each day, for the Stats screen. Stored only on this computer.</small></span>
+    </label>
+
     <h3 class="qz-opt-head">Anki</h3>
     <label class="qz-switch">
       <input type="checkbox" id="optTag">
@@ -286,6 +309,7 @@
       <dt>Enter</dt><dd>Answer, then continue, in Learn and Write</dd>
       <dt>O</dt><dd>Options</dd>
       <dt>T</dt><dd>Next theme</dd>
+      <dt>P</dt><dd>Stats</dd>
     </dl>
     <p class="qz-fineprint">Studying here never changes Anki's scheduling. The tag above is the only change it can make to your collection, and Anki's Undo reverses it.</p>
   </aside>

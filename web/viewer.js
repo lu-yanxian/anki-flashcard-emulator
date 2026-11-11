@@ -40,7 +40,7 @@
   const settings = Object.assign(
     { shuffle: false, start_side: "front", track_progress: true, starred_only: false, front_size: 180, back_size: 140,
       mode: "flashcards", match_pairs: 6, choose_on_open: true, autoplay_audio: false,
-      learn_types: "both", any_line: true, auto_advance: true, tag_still_learning: false, theme: "classic", effects: {}, sapporo_dark: false },
+      learn_types: "both", any_line: true, auto_advance: true, tag_still_learning: false, track_stats: true, theme: "classic", effects: {}, sapporo_dark: false },
     DATA.settings || {},
     DATA.deckSizes || {} // text sizes saved for this deck win over the general ones
   );
@@ -207,7 +207,7 @@
     histPrev.set(cid, hist[k] ? hist[k].slice() : null);
     const [m, n, streak] = hist[k] || [0, 0, 0];
     hist[k] = ok ? [m, n + 1, streak + 1] : [m + 1, n + 1, 0];
-    send("result:" + cid + ":" + (ok ? 1 : 0) + ":" + (untag === false ? 0 : 1));
+    send("result:" + cid + ":" + (ok ? 1 : 0) + ":" + (untag === false ? 0 : 1) + ":" + settings.mode);
   }
 
   function unrecord(cid) {
@@ -865,6 +865,78 @@
     if (ext.write) ext.write.reset();
   }
 
+  // ---------------------------------------------------------------- statistics
+  // Time spent studying: counted while the window is visible and you've
+  // pressed a key or clicked in the last minute, and sent every 15 seconds.
+
+  const activity = { last: Date.now(), pending: 0 };
+  ["keydown", "pointerdown", "wheel"].forEach((ev) =>
+    document.addEventListener(ev, () => { activity.last = Date.now(); }, { capture: true, passive: true })
+  );
+  function flushTime() {
+    if (activity.pending >= 1 && settings.track_stats !== false) send("studytime:" + Math.round(activity.pending));
+    activity.pending = 0;
+  }
+  setInterval(() => {
+    if (!document.hidden && !statsView.open && Date.now() - activity.last < 60000) activity.pending += 5;
+    if (activity.pending >= 15) flushTime();
+  }, 5000);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) flushTime(); });
+  window.addEventListener("pagehide", flushTime);
+
+  // The Stats screen: this deck, or all decks (stats.js draws it).
+  const statsView = { open: false, scope: "deck", resumeMatch: false };
+  const statsEls = {
+    panel: $("qzStats"), body: $("qzStatsBody"), title: $("qzStatsTitle"),
+    deckTab: $("qzStatsDeckTab"), allTab: $("qzStatsAllTab"), close: $("qzStatsClose"), btn: $("qzStatsBtn"),
+  };
+  function requestStats(scope) {
+    statsView.scope = scope;
+    statsEls.deckTab.setAttribute("aria-selected", scope === "deck" ? "true" : "false");
+    statsEls.allTab.setAttribute("aria-selected", scope === "all" ? "true" : "false");
+    statsEls.body.setAttribute("aria-busy", "true");
+    send("stats:" + scope);
+  }
+  window.qzShowStats = function (data) {
+    if (!statsView.open || !window.QZ_STATS) return;
+    statsEls.body.removeAttribute("aria-busy");
+    statsEls.title.textContent = data.scope === "all" ? "Stats: all decks" : "Stats: " + (data.deckName || DATA.deckName).split("::").pop();
+    window.QZ_STATS.render(statsEls.body, data, { onPickDeck: (id) => requestStats(String(id)) });
+    statsEls.body.scrollTop = 0;
+  };
+  function openStats() {
+    if (statsView.open || picker.open || resumeOpen) return;
+    flushTime();
+    openOptions(false);
+    statsView.resumeMatch = settings.mode === "match" && match.running;
+    if (statsView.resumeMatch) stopTimer();
+    statsView.open = true;
+    els.root.classList.add("statsing");
+    statsEls.panel.hidden = false;
+    replay(statsEls.panel);
+    requestStats(statsView.scope === "all" ? "all" : "deck");
+    statsEls.close.focus();
+  }
+  function closeStats() {
+    if (!statsView.open) return;
+    statsView.open = false;
+    if (window.QZ_STATS) window.QZ_STATS.hideTip();
+    statsEls.panel.hidden = true;
+    els.root.classList.remove("statsing");
+    activity.last = Date.now();
+    if (statsView.resumeMatch) setMode("match"); // a game in progress goes back to its start screen
+    else if (settings.mode === "flashcards" && !state.ended) els.flipper.focus();
+  }
+  statsEls.btn.addEventListener("click", openStats);
+  statsEls.close.addEventListener("click", closeStats);
+  statsEls.deckTab.addEventListener("click", () => requestStats("deck"));
+  statsEls.allTab.addEventListener("click", () => requestStats("all"));
+  $("optStats").addEventListener("change", (e) => {
+    flushTime();
+    settings.track_stats = e.target.checked;
+    saveSettings();
+  });
+
   // ---------------------------------------------------------------- options
 
   function optionsOpen() {
@@ -891,6 +963,7 @@
     els.optAnyLine.checked = settings.any_line;
     els.optAutoAdvance.checked = settings.auto_advance;
     els.optTag.checked = settings.tag_still_learning;
+    $("optStats").checked = settings.track_stats !== false;
     els.optTagNote.textContent = "Adds the tag " + (DATA.tagName || "quizlet::still-learning") +
       " to a note when you miss it, and takes it off once you know the card. Find them in Anki's Browse.";
     document.querySelectorAll('input[name="optLearnTypes"]').forEach((r) => (r.checked = r.value === settings.learn_types));
@@ -1099,6 +1172,8 @@
     e.preventDefault();
     if (optionsOpen()) {
       openOptions(false);
+    } else if (statsView.open) {
+      closeStats();
     } else if (picker.open) {
       if (document.activeElement === els.selFilter && els.selFilter.value) {
         els.selFilter.value = "";
@@ -1116,6 +1191,7 @@
     const t = e.target;
     const inField = t && (t.tagName === "INPUT" || t.tagName === "SELECT" || t.tagName === "TEXTAREA");
     if (picker.open || resumeOpen || optionsOpen()) return;
+    if (statsView.open) return;
     const m = settings.mode;
     if (ext[m] && ext[m].keydown(e, inField)) return;
     if (inField || e.altKey || e.metaKey) return;
@@ -1127,6 +1203,7 @@
       if (k === "c") { e.preventDefault(); openPicker(false); return; }
       if (k === "o") { e.preventDefault(); openOptions(true); return; }
       if (k === "t") { e.preventDefault(); cycleTheme(); return; }
+      if (k === "p") { e.preventDefault(); openStats(); return; }
     }
     if (m !== "flashcards") return; // Match tiles are buttons: Tab moves, Space/Enter picks
     if (e.ctrlKey) {
