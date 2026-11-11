@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.10
+
+- **Flashcards:** when you finish a set, the main button (and the one Enter presses) is now **Start over** / **Restart flashcards**, so you repeat the same cards by default. **Add cards** is still there next to it.
+
 ## v1.9
 
 - **Match, Learn and Write:** for note types whose back shows the front field again (after Anki's divider), the front is now taken out wherever it would give the answer away: Match answer tiles, Learn's answer choices, Write's answer checking, and the question when you study back-to-front. Flipping a card in Flashcards still shows the whole back, front included.

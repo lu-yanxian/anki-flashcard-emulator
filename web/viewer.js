@@ -679,8 +679,8 @@
         "You went through all " + total + " cards",
         "Go again from the start, or shuffle for a different order.",
         [
-          batchButton("qz-btn-primary"),
-          button("Start over", nextBatch() ? "qz-btn-outline" : "qz-btn-primary", restart),
+          button("Start over", "qz-btn-primary", restart),
+          batchButton("qz-btn-outline"),
           button("Shuffle and start over", "qz-btn-outline", () => { setShuffle(true); restart(); }),
         ]
       );
@@ -692,7 +692,7 @@
       endScreen(
         "You know all " + total + " cards",
         "Every card in this round went to Know. Restart to go through the full set again.",
-        [batchButton("qz-btn-primary"), button("Restart flashcards", nextBatch() ? "qz-btn-outline" : "qz-btn-primary", restart)],
+        [button("Restart flashcards", "qz-btn-primary", restart), batchButton("qz-btn-outline")],
         { know, learning: 0 }
       );
       return;
