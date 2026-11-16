@@ -908,10 +908,13 @@
     statsEls.body.scrollTop = 0;
   };
   function openStats() {
-    if (statsView.open || picker.open || resumeOpen) return;
+    if (statsView.open || resumeOpen) return;
     flushTime();
+    // from the card picker, Stats sits on top of it and goes back to it
+    statsView.fromPicker = picker.open;
+    statsEls.close.textContent = picker.open ? "Back to choosing cards" : "Back to studying";
     openOptions(false);
-    statsView.resumeMatch = settings.mode === "match" && match.running;
+    statsView.resumeMatch = !picker.open && settings.mode === "match" && match.running;
     if (statsView.resumeMatch) stopTimer();
     statsView.open = true;
     els.root.classList.add("statsing");
@@ -927,7 +930,8 @@
     statsEls.panel.hidden = true;
     els.root.classList.remove("statsing");
     activity.last = Date.now();
-    if (statsView.resumeMatch) setMode("match"); // a game in progress goes back to its start screen
+    if (statsView.fromPicker) els.selFilter.focus();
+    else if (statsView.resumeMatch) setMode("match"); // a game in progress goes back to its start screen
     else if (settings.mode === "flashcards" && !state.ended) els.flipper.focus();
   }
   statsEls.btn.addEventListener("click", openStats);

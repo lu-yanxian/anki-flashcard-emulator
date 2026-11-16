@@ -158,13 +158,3 @@
 }
 .qz-stats-tip[hidden] { display: none; }
 
-/* the stand-alone Stats window (Tools menu) */
-.qz-statswin { display: grid; grid-template-rows: auto 1fr; height: 100%; }
-.qz-statswin .qz-stats-top { padding: 16px 20px 0; }
-.qz-statswin .qz-stats-scroll { padding: 14px 20px 22px; }
-.qz-statswin select {
-  font: inherit; font-size: 14px; color: var(--ink);
-  background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius-ctl);
-  padding: 6px 10px; max-width: 60vw;
-}
-.qz-statswin select:focus { outline: none; border-color: var(--accent); }

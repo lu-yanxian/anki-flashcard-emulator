@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.14
+
+- **Stats** now opens from the card picker too. "Back to choosing cards" returns you to the picker with your selection as you left it.
+- Removed **Tools → Flashcard Emulator Stats…** from Anki's main window. Stats are on the Stats button (or **P**) in the study window.
+
 ## v1.13
 
 - **Card picker:** the add-from option is now a single small switch beside the Add buttons. It reads **Add after last card** when on (the default) and **Add from start of deck** when off.

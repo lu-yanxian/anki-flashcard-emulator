@@ -14,7 +14,6 @@ optional "still learning" tag, which you turn on in Options.
 from __future__ import annotations
 
 import copy
-import html
 import json
 import os
 import time
@@ -785,121 +784,6 @@ class FlashcardViewer(QDialog):
         self.deleteLater()
 
 
-class StatsWindow(QDialog):
-    """Tools > Flashcard Emulator Stats: the Stats screen without a study
-    session, for all decks or any one deck."""
-
-    GEOM_KEY = "quizlet_emulator_stats"
-
-    def __init__(self) -> None:
-        super().__init__(None, Qt.WindowType.Window)
-        self.silentlyClose = True
-        self.setWindowTitle("Flashcard Emulator Stats")
-        self.conf = get_config()
-        self._closed = False
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        self.web = AnkiWebView(parent=self, title="quizlet_emulator_stats")
-        self.web.set_bridge_command(self.on_bridge, self)
-        layout.addWidget(self.web)
-        self.resize(980, 760)
-        restoreGeom(self, self.GEOM_KEY)
-
-        study = self.conf["study"]
-        theme = study.get("theme") or "classic"
-        city = theme not in ("classic", "classic-dark")
-        night = theme == "classic-dark" or theme == "tokyo" or (theme == "sapporo" and study.get("sapporo_dark"))
-        decks = sorted(
-            ((d.id, d.name) for d in mw.col.decks.all_names_and_ids(skip_empty_default=True, include_filtered=False)),
-            key=lambda x: x[1].lower(),
-        )
-        options = "".join(
-            f'<option value="{did}">{html.escape(name)}</option>' for did, name in decks
-        )
-        font_base = f"/_addons/{mw.addonManager.addonFromModule(MODULE)}/web/fonts/"
-        head = (
-            f"<style>{_read_web('fonts/fonts.css').replace('__FONTBASE__', font_base)}</style>"
-            f"<style>{_read_web('viewer.css')}</style>"
-            f"<style>{_read_web('themes.css')}</style>"
-            f"<style>{_read_web('stats.css')}</style>"
-            "<style>html,body{height:100%;overflow:hidden}</style>"
-        )
-        body = (
-            f'<div id="qz" class="qz qz-statswin{" night" if night else ""}"'
-            + (f' data-theme="{theme}"' if city else "")
-            + '><div class="qz-atmos" aria-hidden="true"><i></i><i></i><i></i></div>'
-            '<div class="qz-stats-top"><h2 id="qzStatsTitle">Stats</h2>'
-            '<select id="qzStatsDeck" aria-label="Deck"><option value="all">All decks</option>'
-            + options
-            + '</select></div><div class="qz-stats-scroll" id="qzStatsBody"></div></div>'
-            + f"<script>{_read_web('stats.js')}</script>"
-            + """<script>
-(function () {
-  var sel = document.getElementById("qzStatsDeck");
-  var root = document.getElementById("qz");
-  document.documentElement.style.background = document.body.style.background = getComputedStyle(root).backgroundColor;
-  function ask() { pycmd("qz:stats:" + sel.value); }
-  sel.addEventListener("change", ask);
-  var got = false;
-  window.qzShowStats = function (d) {
-    got = true;
-    document.getElementById("qzStatsTitle").textContent = d.scope === "all" ? "Stats: all decks" : "Stats: " + d.deckName.split("::").pop();
-    QZ_STATS.render(document.getElementById("qzStatsBody"), d, { onPickDeck: function (id) { sel.value = String(id); ask(); } });
-  };
-  // the link to Anki may not be ready the moment the page loads: ask until it answers
-  (function first(n) {
-    if (got || n > 25) return;
-    setTimeout(function () { first(n + 1); }, 400);
-    try { ask(); } catch (e) { /* pycmd not there yet */ }
-  })(0);
-})();
-</script>"""
-        )
-        self.web.stdHtml(body, css=[], js=[], head=head, context=self, default_css=False)
-        _open_viewers.append(self)
-        self.show()
-        self.activateWindow()
-
-    def on_bridge(self, cmd: str) -> Any:
-        if not cmd.startswith("qz:stats:") or self._closed or not mw.col:
-            return None
-        arg = cmd[len("qz:stats:"):]
-        deck = int(arg) if arg.isdigit() else None
-        data = stats_for(deck, self.conf)
-        self.web.eval(f"window.qzShowStats && window.qzShowStats({_json_for_script(data)});")
-        return None
-
-    def refresh_edited(self) -> None:  # called for every open window; nothing to refresh here
-        pass
-
-    def keyPressEvent(self, event: QKeyEvent) -> None:  # noqa: N802
-        if event.key() == Qt.Key.Key_Escape:
-            self.close()
-            return
-        super().keyPressEvent(event)
-
-    def closeEvent(self, event: Any) -> None:  # noqa: N802
-        if not self._closed:
-            self._closed = True
-            saveGeom(self, self.GEOM_KEY)
-            self.web.cleanup()
-            if self in _open_viewers:
-                _open_viewers.remove(self)
-        event.accept()
-        self.deleteLater()
-
-
-def open_stats() -> None:
-    if not mw.col:
-        return
-    for win in _open_viewers:
-        if isinstance(win, StatsWindow):
-            win.activateWindow()
-            win.raise_()
-            return
-    StatsWindow()
-
-
 # ---------------------------------------------------------------------------
 # Entry points and hooks
 # ---------------------------------------------------------------------------
@@ -957,8 +841,6 @@ def setup() -> None:
     mw.addonManager.setWebExports(MODULE, r"web/fonts/.*\.woff2")
     action = mw.form.menuTools.addAction("Flashcard Emulator…")
     qconnect(action.triggered, lambda: open_setup())
-    stats_action = mw.form.menuTools.addAction("Flashcard Emulator Stats…")
-    qconnect(stats_action.triggered, open_stats)
     gui_hooks.deck_browser_will_show_options_menu.append(on_deck_options_menu)
     gui_hooks.operation_did_execute.append(on_operation)
     gui_hooks.profile_will_close.append(on_profile_close)

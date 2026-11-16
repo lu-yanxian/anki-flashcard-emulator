@@ -1,6 +1,5 @@
 /* The Stats screen: draws one deck's (or all decks') statistics into a
-   container. Used by the study window and by the Tools > Flashcard Emulator
-   Stats window. The numbers come from stats.py (build_stats). */
+   container. Used by the study window. The numbers come from stats.py (build_stats). */
 
 (function () {
   "use strict";

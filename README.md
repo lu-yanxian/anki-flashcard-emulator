@@ -33,7 +33,7 @@ Press **P** or click **Stats** to see how you're doing, for the deck you're stud
 - **Accuracy**, an **activity calendar** of the last 26 weeks, cards answered each day for the last two weeks, and a breakdown by mode with your best Match times.
 - With **All decks**, a table of every deck you've studied: cards learned, answers, time and when you last studied it.
 
-You can also open your statistics from Anki's main window with **Tools → Flashcard Emulator Stats…**, without starting a session. Statistics are kept only on your computer, and you can turn them off in **Options**.
+Statistics are kept only on your computer, and you can turn them off in **Options**.
 
 ![The Stats screen](docs/stats-classic.png)
 
