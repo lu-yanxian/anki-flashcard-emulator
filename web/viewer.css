@@ -1053,9 +1053,10 @@ html.night-mode body { background: #11141f; }
 .qz-row:hover .qz-row-edit, .qz-row-edit:focus-visible { opacity: 1; }
 .qz-row-edit:hover { background: var(--accent-soft); color: var(--accent); }
 .qz-row-edit:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.qz-addfrom { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-left: auto; font-size: 13.5px; }
-.qz-addfrom-label { color: var(--muted); font-weight: 600; }
-.qz-addfrom .qz-chip span { padding: 5px 10px; font-size: 13px; }
+.qz-switch.qz-addfrom { display: inline-flex; align-items: center; gap: 7px; margin-left: auto; font-size: 13px; }
+.qz-addfrom-label { color: var(--muted); font-weight: 500; white-space: nowrap; }
+.qz-addfrom:hover .qz-addfrom-label { color: var(--ink); }
+.qz-switch.qz-addfrom input { transform: scale(0.72); margin: -4px -5px; }
 
 .qz-select-empty { padding: 32px; text-align: center; color: var(--muted); }
 

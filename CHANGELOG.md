@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.13
+
+- **Card picker:** the add-from option is now a single small switch beside the Add buttons. It reads **Add after last card** when on (the default) and **Add from start of deck** when off.
+
 ## v1.12
 
 - **Card picker:** Add 5, Add 10 and Add 20 now continue after the last card you chose, so you can work through a section in the middle of a deck. A new switch under the buttons sets them to add **after the last chosen card** (the default) or **from the start**. With nothing chosen they start at the first card, and if they reach the end of the deck they carry on from the top. The **Add cards** button at the end of a round follows the same switch.

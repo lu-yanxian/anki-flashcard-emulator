@@ -1866,15 +1866,16 @@
   }
   function syncAddFrom() {
     const v = settings.add_from === "start" ? "start" : "last";
-    document.querySelectorAll('input[name="qzAddFrom"]').forEach((r) => (r.checked = r.value === v));
+    $("qzAddFrom").checked = v === "last";
+    $("qzAddFromText").textContent = v === "start" ? "Add from start of deck" : "Add after last card";
     $("qzSelHint").textContent = (v === "start"
       ? "Add 5, 10 and 20 take the next unticked cards from the start of the deck."
       : "Add 5, 10 and 20 take the next unticked cards after the last one chosen (from the start if none are).") +
       " Shift-click selects a range.";
   }
-  document.querySelectorAll('input[name="qzAddFrom"]').forEach((r) =>
-    r.addEventListener("change", () => { settings.add_from = r.value; saveSettings(); syncAddFrom(); })
-  );
+  $("qzAddFrom").addEventListener("change", (e) => {
+    settings.add_from = e.target.checked ? "last" : "start"; saveSettings(); syncAddFrom();
+  });
 
   function openPicker(initial) {
     if (picker.open) return;

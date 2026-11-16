@@ -111,11 +111,10 @@
         <button class="qz-btn qz-btn-soft" id="qzAddTrouble" title="Cards you've missed at least twice and haven't got right three times in a row since">Add trouble cards</button>
         <button class="qz-btn qz-btn-soft" id="qzAddAll">Add all shown</button>
         <button class="qz-btn qz-btn-quiet" id="qzClearSel">Clear all</button>
-        <div class="qz-addfrom" role="radiogroup" aria-label="Where Add 5, 10 and 20 start">
-          <span class="qz-addfrom-label">Add</span>
-          <label class="qz-chip"><input type="radio" name="qzAddFrom" value="last"><span>after the last chosen card</span></label>
-          <label class="qz-chip"><input type="radio" name="qzAddFrom" value="start"><span>from the start</span></label>
-        </div>
+        <label class="qz-switch qz-addfrom" title="Where Add 5, 10 and 20 start">
+          <input type="checkbox" id="qzAddFrom" role="switch">
+          <span class="qz-addfrom-label" id="qzAddFromText"></span>
+        </label>
       </div>
       <div class="qz-select-list" id="qzSelList" aria-label="Cards in this deck"></div>
       <div class="qz-select-foot">
