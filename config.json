@@ -24,7 +24,8 @@
         "theme": "classic",
         "effects": {},
         "sapporo_dark": false,
-        "track_stats": true
+        "track_stats": true,
+        "add_from": "last"
     },
     "tag_name": "quizlet::still-learning"
 }

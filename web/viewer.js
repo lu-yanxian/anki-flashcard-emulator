@@ -40,7 +40,7 @@
   const settings = Object.assign(
     { shuffle: false, start_side: "front", track_progress: true, starred_only: false, front_size: 180, back_size: 140,
       mode: "flashcards", match_pairs: 6, choose_on_open: true, autoplay_audio: false,
-      learn_types: "both", any_line: true, auto_advance: true, tag_still_learning: false, track_stats: true, theme: "classic", effects: {}, sapporo_dark: false },
+      learn_types: "both", any_line: true, auto_advance: true, tag_still_learning: false, track_stats: true, add_from: "last", theme: "classic", effects: {}, sapporo_dark: false },
     DATA.settings || {},
     DATA.deckSizes || {} // text sizes saved for this deck win over the general ones
   );
@@ -826,9 +826,12 @@
     if (!selected.size) return null;
     const sel = [...selected].map((id) => idxById.get(id)).filter((i) => i != null).sort((a, b) => a - b);
     if (!sel.length) return null;
-    const last = sel[sel.length - 1];
+    const last = settings.add_from === "start" ? -1 : sel[sel.length - 1];
     const add = [];
     for (let i = last + 1; i < cards.length && add.length < GROW_BY; i++) {
+      if (!selected.has(cards[i].id)) add.push(i);
+    }
+    for (let i = 0; i <= last && add.length < GROW_BY; i++) { // then from the top, if the end ran out
       if (!selected.has(cards[i].id)) add.push(i);
     }
     if (!add.length) return null;
@@ -1741,9 +1744,14 @@
         '<input type="checkbox" aria-label="Include card ' + (i + 1) + '">' +
         '<span class="qz-row-num">' + (i + 1) + "</span>" +
         '<div class="qz-row-side"><div class="qz-row-host"></div></div>' +
-        '<div class="qz-row-side"><div class="qz-row-host"></div></div>';
+        '<div class="qz-row-side"><div class="qz-row-host"></div></div>' +
+        '<button type="button" class="qz-row-edit" title="Edit in Browse" aria-label="Edit card ' + (i + 1) + ' in Browse"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button>';
       el.addEventListener("click", (e) => {
         e.preventDefault();
+        if (e.target.closest(".qz-row-edit")) { // open the card in Anki's Browse, don't tick it
+          send("edit:" + c.id);
+          return;
+        }
         const changed = toggleRow(i, e.shiftKey);
         // A click that lands on the checkbox itself is undone by the browser
         // once this handler returns (the default action was cancelled), which
@@ -1841,10 +1849,32 @@
     return [i];
   }
 
+  // Add 5 / 10 / 20: the next unticked cards in deck order, starting after the
+  // furthest card already chosen (so you can work through the middle of a
+  // deck), or from the top. With nothing chosen yet, both start at the top.
+  function lastChosenIdx(ids) {
+    let last = -1;
+    ids.forEach((id) => { const i = idxById.get(id); if (i != null && i > last) last = i; });
+    return last;
+  }
   function addNext(n) {
-    const next = visibleIdx().filter((i) => !picker.draft.has(cards[i].id)).slice(0, n);
+    const open = visibleIdx().filter((i) => !picker.draft.has(cards[i].id));
+    const last = settings.add_from === "start" ? -1 : lastChosenIdx(picker.draft);
+    // after the last chosen card first, then from the top if that runs out
+    const next = open.filter((i) => i > last).concat(open.filter((i) => i <= last)).slice(0, n);
     setRows(next, true, true);
   }
+  function syncAddFrom() {
+    const v = settings.add_from === "start" ? "start" : "last";
+    document.querySelectorAll('input[name="qzAddFrom"]').forEach((r) => (r.checked = r.value === v));
+    $("qzSelHint").textContent = (v === "start"
+      ? "Add 5, 10 and 20 take the next unticked cards from the start of the deck."
+      : "Add 5, 10 and 20 take the next unticked cards after the last one chosen (from the start if none are).") +
+      " Shift-click selects a range.";
+  }
+  document.querySelectorAll('input[name="qzAddFrom"]').forEach((r) =>
+    r.addEventListener("change", () => { settings.add_from = r.value; saveSettings(); syncAddFrom(); })
+  );
 
   function openPicker(initial) {
     if (picker.open) return;
@@ -1856,6 +1886,7 @@
     picker.draft = new Set(selected);
     picker.anchor = -1;
     picker.rows.forEach((_, i) => paintRow(i));
+    syncAddFrom();
     els.selCancel.hidden = initial;
     if (ext[settings.mode] && ext[settings.mode].leave) ext[settings.mode].leave();
     els.root.classList.add("selecting");

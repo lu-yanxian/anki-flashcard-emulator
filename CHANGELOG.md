@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.12
+
+- **Card picker:** Add 5, Add 10 and Add 20 now continue after the last card you chose, so you can work through a section in the middle of a deck. A new switch under the buttons sets them to add **after the last chosen card** (the default) or **from the start**. With nothing chosen they start at the first card, and if they reach the end of the deck they carry on from the top. The **Add cards** button at the end of a round follows the same switch.
+- **Card picker:** each row has a small pencil button that opens the card in Anki's Browse window for editing.
+
 ## v1.11
 
 - **Statistics.** A new Stats screen (press **P** or click **Stats**) shows your progress for the deck you're studying or for all decks: cards learned, day streak, days practised, time studied, accuracy, a 26-week activity calendar, cards answered over the last two weeks, a breakdown by mode with best Match times, and (for all decks) a table of every deck you've studied.

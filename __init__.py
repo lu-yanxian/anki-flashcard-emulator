@@ -83,6 +83,7 @@ DEFAULTS: dict[str, Any] = {
         "auto_advance": True,
         "tag_still_learning": False,
         "track_stats": True,
+        "add_from": "last",
     },
 }
 
