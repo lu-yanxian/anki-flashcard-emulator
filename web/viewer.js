@@ -1892,6 +1892,7 @@
     send("stopaudio");
     picker.open = true;
     picker.initial = initial;
+    pauseClockFor();
     picker.draft = new Set(selected);
     picker.anchor = -1;
     picker.rows.forEach((_, i) => paintRow(i));
@@ -1916,6 +1917,7 @@
     }
     picker.open = false;
     els.select.hidden = true;
+    resumeClockAfter();
     els.root.classList.remove("selecting");
     if (apply || picker.initial) resetAll();
     setMode(settings.mode);
@@ -2155,7 +2157,7 @@
     audio: null,
   };
   const ck = {
-    btn: $("qzClockBtn"), panel: $("qzClock"), label: $("qzClockLabel"), read: $("qzClockRead"), dot: $("qzClockDot"),
+    btn: $("qzClockBtn"), panel: $("qzClock"), label: $("qzClockLabel"), read: $("qzClockRead"),
     timerTime: $("qzTimerTime"), timerGo: $("qzTimerGo"), timerReset: $("qzTimerReset"), custom: $("qzTimerCustom"),
     watchTime: $("qzWatchTime"), watchGo: $("qzWatchGo"), watchReset: $("qzWatchReset"), show: $("qzClockShow"),
   };
@@ -2227,15 +2229,15 @@
     const visible = settings.clock_visible !== false;
     const parts = [];
     if (timerOn) parts.push('<span class="qz-clock-part-read' + (t.running ? "" : " paused") + (t.done ? " done" : "") + '">' + ICON_TIMER + fmtClock(left, false) + "</span>");
-    if (watchOn) parts.push('<span class="qz-clock-part-read' + (w.running ? "" : " paused") + '">' + ICON_WATCH + fmtClock(total, true) + "</span>");
-    const showRead = visible && parts.length > 0;
+    if (watchOn && visible) parts.push('<span class="qz-clock-part-read' + (w.running ? "" : " paused") + '">' + ICON_WATCH + fmtClock(total, true) + "</span>");
+    // a finished timer always shows, even when hidden, until it's dismissed
+    const showRead = (visible || t.done) && parts.length > 0;
     if (showRead) {
       const html = parts.join("");
       if (ck.read.innerHTML !== html) ck.read.innerHTML = html;
     }
     ck.read.hidden = !showRead;
     ck.label.hidden = showRead;
-    ck.dot.hidden = visible || !(t.running || w.running);
     ck.btn.classList.toggle("ringing", t.done);
     ck.btn.classList.toggle("active", showRead);
 
@@ -2273,13 +2275,35 @@
     paintClock();
   }
 
+
+  // Choosing cards isn't studying: pause whatever is running, and pick it up
+  // again on the way out.
+  function pauseClockFor() {
+    const t = clock.timer, w = clock.watch;
+    clock.held = { timer: t.running, watch: w.running };
+    if (t.running) { t.left = timerLeft(); t.running = false; }
+    if (w.running) { w.acc = watchTotal(); w.running = false; }
+    paintClock();
+  }
+  function resumeClockAfter() {
+    const held = clock.held;
+    clock.held = null;
+    if (!held) return;
+    if (held.timer && !clock.timer.running && !clock.timer.done && clock.timer.left > 0) {
+      clock.timer.endAt = Date.now() + clock.timer.left;
+      clock.timer.running = true;
+    }
+    if (held.watch && !clock.watch.running) { clock.watch.startAt = Date.now(); clock.watch.running = true; }
+    paintClock();
+  }
+
   function clockOpen() { return !ck.panel.hidden; }
   function openClock(open) {
     ck.panel.hidden = !open;
     ck.btn.setAttribute("aria-expanded", open ? "true" : "false");
     if (open) {
       if (clock.timer.done) { clock.timer.done = false; clock.timer.left = clock.timer.len; } // seen: dismiss the alarm
-      ck.show.checked = settings.clock_visible !== false;
+      ck.show.checked = settings.clock_visible === false;
       paintClock();
       replay(ck.panel);
       ck.timerGo.focus();
@@ -2321,7 +2345,7 @@
     paintClock();
   });
   ck.show.addEventListener("change", () => {
-    settings.clock_visible = ck.show.checked;
+    settings.clock_visible = !ck.show.checked;
     saveSettings();
     paintClock();
   });

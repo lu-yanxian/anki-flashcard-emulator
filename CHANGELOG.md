@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.16
+
+- **Timer and stopwatch:** both pause while you're choosing cards and carry on when you go back.
+- When the timer ends it now shows in the top bar even if hidden, until you click it.
+- The show/hide switch is now just **Hide**, and nothing shows on the Timer button while the times are hidden.
+
 ## v1.15
 
 - **Timer and stopwatch.** A new **Timer** button in the top bar (or press **K**) opens a timer and a stopwatch that can run at the same time, in every mode. The timer has 5, 10, 25 and 30 minute buttons and takes any other length. Running times show in the top bar, or can be hidden while they keep running. When the timer ends, a chime plays, the button rings until you click it, and Anki's taskbar icon flashes if the window is behind others.

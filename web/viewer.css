@@ -186,11 +186,6 @@ html.night-mode body { background: #11141f; }
 .qz-clock-part-read.paused { color: var(--muted); }
 .qz-clock-part-read.done { color: var(--wrong); }
 .qz-clock-btn.active > svg { display: none; }
-.qz-clock-dot {
-  position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; border-radius: 50%;
-  background: var(--accent); box-shadow: 0 0 0 2px var(--bg);
-}
-.qz-clock-dot[hidden] { display: none; }
 .qz-clock-btn.ringing { color: var(--wrong); background: color-mix(in srgb, var(--wrong) 14%, transparent); animation: qz-ring 1s ease-in-out infinite; }
 @keyframes qz-ring { 0%, 100% { rotate: 0deg; } 10% { rotate: -6deg; } 20% { rotate: 6deg; } 30% { rotate: -3deg; } 40% { rotate: 0deg; } }
 
@@ -232,7 +227,7 @@ html.night-mode body { background: #11141f; }
 .qz-clock-custom:focus-within { border-color: var(--accent); }
 .qz-clock-ctl { display: flex; gap: 6px; }
 .qz-clock-ctl .qz-btn-soft { min-width: 84px; justify-content: center; }
-.qz-clock-show { padding-top: 12px; border-top: 1px solid var(--line); }
+.qz-clock-show { padding-top: 12px; border-top: 1px solid var(--line); align-items: center; }
 .qz-clock-show .qz-switch-text b { font-size: 14px; }
 
 .qz-progress { background: var(--line); display: flex; overflow: hidden; }
@@ -1282,7 +1277,7 @@ html.night-mode body { background: #11141f; }
   #qzCardsBtnText { display: none; }
   .qz-top-right { gap: 0; }
   .qz-top-right .qz-btn { padding: 8px 6px; }
-  /* no room for the times here: show the icon with a dot, as when hidden */
+  /* no room for the times here: show the icon with a dot */
   .qz-clock-btn .qz-clock-read { display: none !important; }
   .qz-clock-btn.active > svg { display: block; }
   .qz-clock-btn.active::after {
