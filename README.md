@@ -37,6 +37,10 @@ Statistics are kept only on your computer, and you can turn them off in **Option
 
 ![The Stats screen](docs/stats-classic.png)
 
+## Timer and stopwatch
+
+Click **Timer** in the top bar (or press **K**) to set a timer, start a stopwatch, or both at once. The timer has one-click **5**, **10**, **25** and **30 minute** buttons, or type any length. While they run, their times show in the top bar; turn off **Show in the top bar** to hide them and keep them running, with only a small dot to show something's on. When the timer ends you'll hear a chime and the Timer button rings until you click it.
+
 ## Answer checking
 
 Typed answers are forgiving where it makes sense:
@@ -101,6 +105,7 @@ Tested with Anki 26.09.
 | O | Options |
 | T | Next theme |
 | P | Stats |
+| K | Timer and stopwatch |
 
 ## Your data
 

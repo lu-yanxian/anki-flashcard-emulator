@@ -174,6 +174,67 @@ html.night-mode body { background: #11141f; }
 
 .qz-top-right { justify-self: end; display: flex; gap: 4px; }
 
+/* ---------- Timer and stopwatch ---------- */
+
+.qz-top { z-index: 2; } /* above the stage, so the timer panel can hang over it */
+.qz-clock-wrap { position: relative; display: flex; }
+.qz-clock-btn { position: relative; }
+.qz-clock-read { display: inline-flex; gap: 10px; font-family: var(--num-font); font-variant-numeric: tabular-nums; color: var(--ink); }
+.qz-clock-read[hidden] { display: none; }
+.qz-clock-part-read { display: inline-flex; align-items: center; gap: 4px; }
+.qz-clock-part-read svg { width: 14px; height: 14px; opacity: 0.7; }
+.qz-clock-part-read.paused { color: var(--muted); }
+.qz-clock-part-read.done { color: var(--wrong); }
+.qz-clock-btn.active > svg { display: none; }
+.qz-clock-dot {
+  position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 0 2px var(--bg);
+}
+.qz-clock-dot[hidden] { display: none; }
+.qz-clock-btn.ringing { color: var(--wrong); background: color-mix(in srgb, var(--wrong) 14%, transparent); animation: qz-ring 1s ease-in-out infinite; }
+@keyframes qz-ring { 0%, 100% { rotate: 0deg; } 10% { rotate: -6deg; } 20% { rotate: 6deg; } 30% { rotate: -3deg; } 40% { rotate: 0deg; } }
+
+.qz-clock {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 11;
+  width: 300px;
+  padding: 14px 16px 16px;
+  display: grid;
+  gap: 14px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius-ctl) + 6px);
+  box-shadow: var(--shadow);
+}
+.qz-clock[hidden] { display: none; }
+.qz-clock-part { display: grid; gap: 10px; }
+.qz-clock-part + .qz-clock-part { padding-top: 14px; border-top: 1px solid var(--line); }
+.qz-clock-head { display: flex; align-items: baseline; justify-content: space-between; }
+.qz-clock-head b { font-weight: 600; color: var(--muted); font-size: 13.5px; }
+.qz-clock-time { font-family: var(--num-font); font-variant-numeric: tabular-nums; font-size: 28px; font-weight: 600; letter-spacing: -0.01em; }
+.qz-clock-time.done { color: var(--wrong); }
+.qz-clock-presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.qz-clock-presets button, .qz-clock-custom {
+  border: 1.5px solid var(--line); border-radius: 999px; background: transparent;
+  padding: 4px 10px; font-size: 13px; font-weight: 600; color: var(--muted);
+}
+.qz-clock-presets button:hover { border-color: var(--accent); color: var(--accent); }
+.qz-clock-custom { display: inline-flex; align-items: center; gap: 2px; padding-right: 9px; }
+.qz-clock-custom input {
+  width: 3.6em; border: 0; background: transparent; color: var(--ink);
+  font: inherit; text-align: center; padding: 0; outline: none; -moz-appearance: textfield;
+}
+.qz-clock-custom input::placeholder { color: var(--muted); opacity: 0.8; }
+.qz-clock-custom input::-webkit-inner-spin-button, .qz-clock-custom input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.qz-clock-custom:focus-within { border-color: var(--accent); }
+.qz-clock-ctl { display: flex; gap: 6px; }
+.qz-clock-ctl .qz-btn-soft { min-width: 84px; justify-content: center; }
+.qz-clock-show { padding-top: 12px; border-top: 1px solid var(--line); }
+.qz-clock-show .qz-switch-text b { font-size: 14px; }
+
 .qz-progress { background: var(--line); display: flex; overflow: hidden; }
 .qz-progress-fill,
 .qz-progress-learn {
@@ -1193,7 +1254,7 @@ html.night-mode body { background: #11141f; }
 .qz-fineprint { margin: 0; font-size: 12px; color: var(--muted); }
 
 @media (max-width: 1020px) {
-  #qzOptionsBtn span, #qzCardsBtnText { display: none; }
+  #qzOptionsBtn span, #qzCardsBtnText, .qz-clock-label { display: none; }
 }
 @media (max-width: 760px) {
   .qz-top { grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; }
@@ -1214,10 +1275,20 @@ html.night-mode body { background: #11141f; }
   .qz-grid { gap: 8px; }
   .qz-row { grid-template-columns: 34px minmax(0, 1fr) minmax(0, 1fr) 32px; gap: 8px; padding-right: 6px; }
   .qz-addfrom { margin-left: 0; }
+  .qz-clock { position: fixed; top: 56px; right: 12px; width: min(300px, calc(100vw - 24px)); }
   .qz-row-num { display: none; }
   .qz-select-hint { display: none; }
   .qz-select-foot { justify-content: flex-end; }
   #qzCardsBtnText { display: none; }
+  .qz-top-right { gap: 0; }
+  .qz-top-right .qz-btn { padding: 8px 6px; }
+  /* no room for the times here: show the icon with a dot, as when hidden */
+  .qz-clock-btn .qz-clock-read { display: none !important; }
+  .qz-clock-btn.active > svg { display: block; }
+  .qz-clock-btn.active::after {
+    content: ""; position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 0 2px var(--bg);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

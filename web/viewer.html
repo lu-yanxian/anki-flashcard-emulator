@@ -9,6 +9,41 @@
       <button role="tab" id="qzModeMatch" data-mode="match" aria-selected="false" title="Match (M)">Match</button>
     </div>
     <div class="qz-top-right">
+    <div class="qz-clock-wrap">
+    <button class="qz-btn qz-btn-quiet qz-clock-btn" id="qzClockBtn" aria-expanded="false" aria-controls="qzClock" title="Timer and stopwatch (K)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 2M9.5 2.5h5M12 2.5V6"/></svg>
+      <span class="qz-clock-label" id="qzClockLabel">Timer</span>
+      <span class="qz-clock-read" id="qzClockRead" hidden></span>
+      <i class="qz-clock-dot" id="qzClockDot" hidden></i>
+    </button>
+    <div class="qz-clock" id="qzClock" hidden role="dialog" aria-label="Timer and stopwatch">
+      <section class="qz-clock-part">
+        <div class="qz-clock-head"><b>Timer</b><output class="qz-clock-time" id="qzTimerTime">25:00</output></div>
+        <div class="qz-clock-presets" role="group" aria-label="Set the timer">
+          <button type="button" data-min="5">5 min</button>
+          <button type="button" data-min="10">10 min</button>
+          <button type="button" data-min="25">25 min</button>
+          <button type="button" data-min="30">30 min</button>
+          <label class="qz-clock-custom" title="Any length, in minutes"><input type="number" id="qzTimerCustom" min="1" max="600" step="1" placeholder="Other" aria-label="Custom timer length in minutes"><span>min</span></label>
+        </div>
+        <div class="qz-clock-ctl">
+          <button type="button" class="qz-btn qz-btn-soft" id="qzTimerGo">Start</button>
+          <button type="button" class="qz-btn qz-btn-quiet" id="qzTimerReset">Reset</button>
+        </div>
+      </section>
+      <section class="qz-clock-part">
+        <div class="qz-clock-head"><b>Stopwatch</b><output class="qz-clock-time" id="qzWatchTime">0:00</output></div>
+        <div class="qz-clock-ctl">
+          <button type="button" class="qz-btn qz-btn-soft" id="qzWatchGo">Start</button>
+          <button type="button" class="qz-btn qz-btn-quiet" id="qzWatchReset">Reset</button>
+        </div>
+      </section>
+      <label class="qz-switch qz-clock-show">
+        <input type="checkbox" id="qzClockShow">
+        <span class="qz-switch-text"><b>Show in the top bar</b><small>Turn off to hide the times while they keep running.</small></span>
+      </label>
+    </div>
+    </div>
     <button class="qz-btn qz-btn-quiet" id="qzStatsBtn" title="Stats (P)">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21.5 20h-19"/></svg>
       <span>Stats</span>
@@ -314,6 +349,7 @@
       <dt>O</dt><dd>Options</dd>
       <dt>T</dt><dd>Next theme</dd>
       <dt>P</dt><dd>Stats</dd>
+      <dt>K</dt><dd>Timer and stopwatch</dd>
     </dl>
     <p class="qz-fineprint">Studying here never changes Anki's scheduling. The tag above is the only change it can make to your collection, and Anki's Undo reverses it.</p>
   </aside>

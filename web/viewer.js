@@ -40,7 +40,7 @@
   const settings = Object.assign(
     { shuffle: false, start_side: "front", track_progress: true, starred_only: false, front_size: 180, back_size: 140,
       mode: "flashcards", match_pairs: 6, choose_on_open: true, autoplay_audio: false,
-      learn_types: "both", any_line: true, auto_advance: true, tag_still_learning: false, track_stats: true, add_from: "last", theme: "classic", effects: {}, sapporo_dark: false },
+      learn_types: "both", any_line: true, auto_advance: true, tag_still_learning: false, track_stats: true, add_from: "last", clock_visible: true, clock_minutes: 25, theme: "classic", effects: {}, sapporo_dark: false },
     DATA.settings || {},
     DATA.deckSizes || {} // text sizes saved for this deck win over the general ones
   );
@@ -792,7 +792,7 @@
   }
 
   let toastTimer = 0;
-  function toast(text) {
+  function toast(text, ms) {
     let t = document.getElementById("qzToast");
     if (!t) {
       t = document.createElement("div");
@@ -806,7 +806,7 @@
     void t.offsetWidth;
     t.classList.add("show");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove("show"), 1800);
+    toastTimer = setTimeout(() => t.classList.remove("show"), ms || 1800);
   }
 
   function updateStarNote() {
@@ -1177,7 +1177,10 @@
     if (e.key !== "Escape") return;
     e.stopImmediatePropagation();
     e.preventDefault();
-    if (optionsOpen()) {
+    if (clockOpen()) {
+      openClock(false);
+      ck.btn.focus();
+    } else if (optionsOpen()) {
       openOptions(false);
     } else if (statsView.open) {
       closeStats();
@@ -1211,6 +1214,7 @@
       if (k === "o") { e.preventDefault(); openOptions(true); return; }
       if (k === "t") { e.preventDefault(); cycleTheme(); return; }
       if (k === "p") { e.preventDefault(); openStats(); return; }
+      if (k === "k") { e.preventDefault(); openClock(!clockOpen()); return; }
     }
     if (m !== "flashcards") return; // Match tiles are buttons: Tab moves, Space/Enter picks
     if (e.ctrlKey) {
@@ -2138,6 +2142,194 @@
       setMode(settings.mode);
     }
   }
+
+
+  // ---------------------------------------------------------------- timer and stopwatch
+  // Both can run at once, in every mode and behind every panel. Times come
+  // from the clock (Date.now), so they stay right however busy the page is.
+
+  const clock = {
+    timer: { len: 25 * 60000, left: 25 * 60000, endAt: 0, running: false, done: false },
+    watch: { acc: 0, startAt: 0, running: false },
+    tick: 0,
+    audio: null,
+  };
+  const ck = {
+    btn: $("qzClockBtn"), panel: $("qzClock"), label: $("qzClockLabel"), read: $("qzClockRead"), dot: $("qzClockDot"),
+    timerTime: $("qzTimerTime"), timerGo: $("qzTimerGo"), timerReset: $("qzTimerReset"), custom: $("qzTimerCustom"),
+    watchTime: $("qzWatchTime"), watchGo: $("qzWatchGo"), watchReset: $("qzWatchReset"), show: $("qzClockShow"),
+  };
+  const ICON_TIMER = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10M7 21h10M8 3c0 5 8 5 8 9s-8 4-8 9M16 3c0 5-8 5-8 9s8 4 8 9"/></svg>';
+  const ICON_WATCH = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4M9.5 2.5h5"/></svg>';
+
+  function fmtClock(ms, up) {
+    const total = up ? Math.floor(ms / 1000) : Math.ceil(ms / 1000);
+    const h = Math.floor(total / 3600), m = Math.floor((total % 3600) / 60), sec = total % 60;
+    const ss = String(sec).padStart(2, "0");
+    return h ? h + ":" + String(m).padStart(2, "0") + ":" + ss : m + ":" + ss;
+  }
+  function timerLeft() {
+    const t = clock.timer;
+    return t.running ? Math.max(0, t.endAt - Date.now()) : t.left;
+  }
+  function watchTotal() {
+    const w = clock.watch;
+    return w.acc + (w.running ? Date.now() - w.startAt : 0);
+  }
+
+  function chime() {
+    try {
+      const ctx = clock.audio || (clock.audio = new (window.AudioContext || window.webkitAudioContext)());
+      if (ctx.state === "suspended") ctx.resume();
+      [0, 0.32, 0.64, 1.5, 1.82, 2.14].forEach((at, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = "sine";
+        o.frequency.value = [784, 988, 1175][i % 3];
+        const t0 = ctx.currentTime + at;
+        g.gain.setValueAtTime(0, t0);
+        g.gain.linearRampToValueAtTime(0.18, t0 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.6);
+        o.connect(g).connect(ctx.destination);
+        o.start(t0);
+        o.stop(t0 + 0.65);
+      });
+    } catch (e) { /* no sound available; the toast and the button still show it */ }
+  }
+  function unlockAudio() { // sound may only start after a click, so get it ready on one
+    try {
+      if (!clock.audio) clock.audio = new (window.AudioContext || window.webkitAudioContext)();
+      if (clock.audio.state === "suspended") clock.audio.resume();
+    } catch (e) { /* ignore */ }
+  }
+
+  function timerFinished() {
+    const t = clock.timer;
+    t.running = false;
+    t.left = 0;
+    t.done = true;
+    chime();
+    send("clockdone");
+    toast("Time's up: " + fmtClock(t.len, true) + " timer", 6000);
+  }
+
+  function paintClock() {
+    const t = clock.timer, w = clock.watch;
+    if (t.running && timerLeft() <= 0) timerFinished();
+    const left = timerLeft(), total = watchTotal();
+    ck.timerTime.textContent = fmtClock(left, false);
+    ck.watchTime.textContent = fmtClock(total, true);
+    ck.timerGo.textContent = t.running ? "Pause" : t.done ? "Restart" : left < t.len ? "Resume" : "Start";
+    ck.watchGo.textContent = w.running ? "Pause" : total > 0 ? "Resume" : "Start";
+    ck.timerTime.classList.toggle("done", t.done);
+
+    const timerOn = t.running || t.done || left < t.len;
+    const watchOn = w.running || total > 0;
+    const visible = settings.clock_visible !== false;
+    const parts = [];
+    if (timerOn) parts.push('<span class="qz-clock-part-read' + (t.running ? "" : " paused") + (t.done ? " done" : "") + '">' + ICON_TIMER + fmtClock(left, false) + "</span>");
+    if (watchOn) parts.push('<span class="qz-clock-part-read' + (w.running ? "" : " paused") + '">' + ICON_WATCH + fmtClock(total, true) + "</span>");
+    const showRead = visible && parts.length > 0;
+    if (showRead) {
+      const html = parts.join("");
+      if (ck.read.innerHTML !== html) ck.read.innerHTML = html;
+    }
+    ck.read.hidden = !showRead;
+    ck.label.hidden = showRead;
+    ck.dot.hidden = visible || !(t.running || w.running);
+    ck.btn.classList.toggle("ringing", t.done);
+    ck.btn.classList.toggle("active", showRead);
+
+    const ticking = t.running || w.running;
+    if (ticking && !clock.tick) clock.tick = setInterval(paintClock, 250);
+    else if (!ticking && clock.tick) { clearInterval(clock.tick); clock.tick = 0; }
+  }
+
+  function setTimerLength(min) {
+    const t = clock.timer;
+    min = Math.max(1, Math.min(600, Math.round(min)));
+    t.len = t.left = min * 60000;
+    t.running = false;
+    t.done = false;
+    settings.clock_minutes = min;
+    saveSettings();
+  }
+  function startTimer() {
+    const t = clock.timer;
+    if (t.done || t.left <= 0) { t.left = t.len; t.done = false; }
+    unlockAudio();
+    t.endAt = Date.now() + t.left;
+    t.running = true;
+  }
+  function toggleTimer() {
+    const t = clock.timer;
+    if (t.running) { t.left = timerLeft(); t.running = false; }
+    else startTimer();
+    paintClock();
+  }
+  function toggleWatch() {
+    const w = clock.watch;
+    if (w.running) { w.acc = watchTotal(); w.running = false; }
+    else { w.startAt = Date.now(); w.running = true; }
+    paintClock();
+  }
+
+  function clockOpen() { return !ck.panel.hidden; }
+  function openClock(open) {
+    ck.panel.hidden = !open;
+    ck.btn.setAttribute("aria-expanded", open ? "true" : "false");
+    if (open) {
+      if (clock.timer.done) { clock.timer.done = false; clock.timer.left = clock.timer.len; } // seen: dismiss the alarm
+      ck.show.checked = settings.clock_visible !== false;
+      paintClock();
+      replay(ck.panel);
+      ck.timerGo.focus();
+    }
+  }
+
+  ck.btn.addEventListener("click", () => {
+    if (clock.timer.done && !clockOpen()) { // the first click after time's up only dismisses it
+      clock.timer.done = false;
+      clock.timer.left = clock.timer.len;
+      paintClock();
+      return;
+    }
+    openClock(!clockOpen());
+  });
+  document.addEventListener("pointerdown", (e) => {
+    if (clockOpen() && !e.target.closest(".qz-clock-wrap")) openClock(false);
+  }, true);
+  ck.panel.querySelectorAll("[data-min]").forEach((b) =>
+    b.addEventListener("click", () => { setTimerLength(Number(b.dataset.min)); ck.custom.value = ""; startTimer(); paintClock(); })
+  );
+  ck.custom.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && Number(ck.custom.value) > 0) {
+      e.preventDefault();
+      setTimerLength(Number(ck.custom.value));
+      startTimer();
+      paintClock();
+    }
+  });
+  ck.custom.addEventListener("change", () => {
+    if (Number(ck.custom.value) > 0 && !clock.timer.running) { setTimerLength(Number(ck.custom.value)); paintClock(); }
+  });
+  ck.timerGo.addEventListener("click", toggleTimer);
+  ck.timerReset.addEventListener("click", () => { setTimerLength(clock.timer.len / 60000); paintClock(); });
+  ck.watchGo.addEventListener("click", toggleWatch);
+  ck.watchReset.addEventListener("click", () => {
+    clock.watch.acc = 0;
+    clock.watch.startAt = Date.now();
+    paintClock();
+  });
+  ck.show.addEventListener("change", () => {
+    settings.clock_visible = ck.show.checked;
+    saveSettings();
+    paintClock();
+  });
+  {
+    const m = Number(settings.clock_minutes) || 25;
+    clock.timer.len = clock.timer.left = Math.max(1, Math.min(600, m)) * 60000;
+  }
+  paintClock();
 
   buildThemePicker();
   applyTheme(settings.theme || "classic");

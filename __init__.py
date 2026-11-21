@@ -24,6 +24,7 @@ from anki.utils import ids2str
 from aqt import dialogs, gui_hooks, mw
 from aqt.operations import CollectionOp, QueryOp
 from aqt.qt import (
+    QApplication,
     QButtonGroup,
     QCheckBox,
     QComboBox,
@@ -83,6 +84,8 @@ DEFAULTS: dict[str, Any] = {
         "tag_still_learning": False,
         "track_stats": True,
         "add_from": "last",
+        "clock_visible": True,
+        "clock_minutes": 25,
     },
 }
 
@@ -576,6 +579,8 @@ class FlashcardViewer(QDialog):
                 av_player.play_tags(tags)
         elif action == "stopaudio":
             av_player.stop_and_clear_queue()
+        elif action == "clockdone":
+            QApplication.alert(self)  # flash the taskbar if the window isn't in front
         elif action == "matchbest":
             pairs, _, secs = arg.partition(":")
             save_match_best(self.deck_id, self.deck_name, str(int(pairs)), round(float(secs), 1))

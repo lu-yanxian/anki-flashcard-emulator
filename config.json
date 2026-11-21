@@ -25,7 +25,9 @@
         "effects": {},
         "sapporo_dark": false,
         "track_stats": true,
-        "add_from": "last"
+        "add_from": "last",
+        "clock_visible": true,
+        "clock_minutes": 25
     },
     "tag_name": "quizlet::still-learning"
 }
