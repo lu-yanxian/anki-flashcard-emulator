@@ -39,7 +39,7 @@ Statistics are kept only on your computer, and you can turn them off in **Option
 
 ## Timer and stopwatch
 
-Click **Timer** in the top bar (or press **K**) to set a timer, start a stopwatch, or both at once. The timer has one-click **5**, **10**, **25** and **30 minute** buttons, or type any length. While they run, their times show in the top bar; switch on **Hide** to hide them while they keep running. Both pause while you're choosing cards and carry on when you go back. When the timer ends you'll hear a chime, and the time shows in the top bar (even if hidden) with the Timer button ringing until you click it.
+Click **Timer** in the top bar (or press **K**) to set a timer, start a stopwatch, or both at once. The timer has one-click **5**, **10**, **25** and **30 minute** buttons, or type any length. While they run, their times show in the top bar; switch on **Hide** to hide them while they keep running. Both pause while you're choosing cards and carry on when you go back. When the timer ends you'll hear a chime, and the time shows in the top bar (even if hidden) with the Timer button blinking red until you click it.
 
 ## Answer checking
 

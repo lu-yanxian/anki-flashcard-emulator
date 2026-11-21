@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.17
+
+- **Timer:** when time's up, the Timer button now blinks red instead of wiggling. With reduced motion turned on in your system, it stays red instead.
+
 ## v1.16
 
 - **Timer and stopwatch:** both pause while you're choosing cards and carry on when you go back.

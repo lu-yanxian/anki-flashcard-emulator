@@ -186,8 +186,11 @@ html.night-mode body { background: #11141f; }
 .qz-clock-part-read.paused { color: var(--muted); }
 .qz-clock-part-read.done { color: var(--wrong); }
 .qz-clock-btn.active > svg { display: none; }
-.qz-clock-btn.ringing { color: var(--wrong); background: color-mix(in srgb, var(--wrong) 14%, transparent); animation: qz-ring 1s ease-in-out infinite; }
-@keyframes qz-ring { 0%, 100% { rotate: 0deg; } 10% { rotate: -6deg; } 20% { rotate: 6deg; } 30% { rotate: -3deg; } 40% { rotate: 0deg; } }
+.qz-clock-btn.ringing { color: var(--wrong); animation: qz-blink 1s steps(1, end) infinite; }
+@keyframes qz-blink {
+  0% { background: color-mix(in srgb, var(--wrong) 22%, transparent); }
+  50% { background: transparent; }
+}
 
 .qz-clock {
   position: absolute;
@@ -1294,6 +1297,7 @@ html.night-mode body { background: #11141f; }
     transition-delay: 0s !important;
   }
   .qz-penalty.show { opacity: 1; }
+  .qz-clock-btn.ringing { animation: none; background: color-mix(in srgb, var(--wrong) 22%, transparent); }
 }
 
 /* ---------- Typography and card ink shared by all themes ---------- */
