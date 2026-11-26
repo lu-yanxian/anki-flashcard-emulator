@@ -70,7 +70,7 @@ Each city theme has an optional background animation, off until you switch it on
 
 ## Other features
 
-- **Text size per side.** Set the front and back text sizes (up to 500%) separately in Options; they're remembered for each deck. With **Overflow sizing** on, a card whose text would run onto a second line is sized down so it fits, but no smaller than a limit you set (70% by default).
+- **Text size per side.** Set the front and back text sizes (up to 500%) separately in Options; they're remembered for each deck. With **Overflow sizing** on, a card whose text would run onto a second line is sized down so it fits, but no smaller than a limit you set (70% by default). It can apply to the front, the back or both.
 - **Stars.** Star cards (S), then study only the starred ones.
 - **Resume.** If you close the window mid-session, you can pick up where you left off next time.
 - **Optional "still learning" tag.** When this is on in Options, notes you miss get a tag (`quizlet::still-learning` by default), and it comes off once you know them. This is the only change the add-on can make to your collection, and Anki's Undo reverses it.

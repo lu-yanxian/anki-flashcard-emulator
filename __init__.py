@@ -89,6 +89,7 @@ DEFAULTS: dict[str, Any] = {
         "search_in": "",
         "fit_text": True,
         "fit_floor": 70,
+        "fit_sides": "both",
     },
 }
 

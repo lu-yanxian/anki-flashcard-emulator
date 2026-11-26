@@ -40,7 +40,7 @@
   const settings = Object.assign(
     { shuffle: false, start_side: "front", track_progress: true, starred_only: false, front_size: 180, back_size: 140,
       mode: "flashcards", match_pairs: 6, choose_on_open: true, autoplay_audio: false,
-      learn_types: "both", any_line: true, auto_advance: true, tag_still_learning: false, track_stats: true, add_from: "last", clock_visible: true, clock_minutes: 25, search_in: "", fit_text: true, fit_floor: 70, theme: "classic", effects: {}, sapporo_dark: false },
+      learn_types: "both", any_line: true, auto_advance: true, tag_still_learning: false, track_stats: true, add_from: "last", clock_visible: true, clock_minutes: 25, search_in: "", fit_text: true, fit_floor: 70, fit_sides: "both", theme: "classic", effects: {}, sapporo_dark: false },
     DATA.settings || {},
     DATA.deckSizes || {} // text sizes saved for this deck win over the general ones
   );
@@ -457,8 +457,11 @@
     const bs = settings.start_side === "back" ? settings.front_size : settings.back_size;
     renderFace(frontRoot, card, s.front.html, fs, true);
     renderFace(backRoot, card, s.back.html, bs, true);
-    fitFace(frontRoot, els.frontHost, fs);
-    fitFace(backRoot, els.backHost, bs);
+    // "front" and "back" mean the card's own sides, as with the text sizes
+    const fit = settings.fit_sides === "front" || settings.fit_sides === "back" ? settings.fit_sides : "both";
+    const flippedStart = settings.start_side === "back";
+    if (fit === "both" || fit === (flippedStart ? "back" : "front")) fitFace(frontRoot, els.frontHost, fs);
+    if (fit === "both" || fit === (flippedStart ? "front" : "back")) fitFace(backRoot, els.backHost, bs);
     return s;
   }
 
@@ -1018,8 +1021,9 @@
     $("optFitText").checked = settings.fit_text !== false;
     $("optFitFloor").value = Math.round(fitFloor() * 100);
     $("optFitFloorOut").textContent = Math.round(fitFloor() * 100) + "%";
-    $("optFitFloorRow").classList.toggle("off", settings.fit_text === false);
-    $("optFitFloor").disabled = settings.fit_text === false;
+    $("optFitBody").classList.toggle("off", settings.fit_text === false);
+    $("optFitFloor").disabled = $("optFitSides").disabled = settings.fit_text === false;
+    document.querySelectorAll('input[name="optFitSides"]').forEach((r) => (r.checked = r.value === (settings.fit_sides || "both")));
     updateStarNote();
   }
 
@@ -1087,8 +1091,8 @@
   );
   $("optFitText").addEventListener("change", (e) => {
     settings.fit_text = e.target.checked;
-    $("optFitFloorRow").classList.toggle("off", !e.target.checked);
-    $("optFitFloor").disabled = !e.target.checked;
+    $("optFitBody").classList.toggle("off", !e.target.checked);
+    $("optFitFloor").disabled = $("optFitSides").disabled = !e.target.checked;
     saveSettings();
     rescale();
   });
@@ -1098,6 +1102,9 @@
     rescale();
   });
   $("optFitFloor").addEventListener("change", saveSettings);
+  document.querySelectorAll('input[name="optFitSides"]').forEach((r) =>
+    r.addEventListener("change", () => { settings.fit_sides = r.value; saveSettings(); rescale(); })
+  );
   { // refit when the window changes size
     let t = 0;
     window.addEventListener("resize", () => {

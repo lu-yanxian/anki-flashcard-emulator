@@ -299,17 +299,26 @@
       <label for="optBackSize">Back text size <output id="optBackSizeOut"></output></label>
       <input type="range" id="optBackSize" min="60" max="500" step="10">
     </div>
-    <div class="qz-fitrow" title="Text that would run onto a second line is made smaller to fit, down to this limit.">
-      <label class="qz-switch qz-switch-sm">
-        <input type="checkbox" id="optFitText">
-        <span class="qz-switch-text"><b>Overflow sizing</b></span>
-      </label>
-      <span class="qz-fitrow-limit" id="optFitFloorRow">
-        <input type="range" id="optFitFloor" min="50" max="90" step="5" aria-label="Shrink no smaller than">
-        <output id="optFitFloorOut"></output>
-      </span>
-    </div>
     <p class="qz-opt-note">Sizes are remembered for this deck.</p>
+    <div class="qz-fit">
+      <label class="qz-fit-head">
+        <span><b>Overflow sizing</b><small>Shrinks long text to fit on one line.</small></span>
+        <span class="qz-switch qz-fit-switch"><input type="checkbox" id="optFitText" role="switch"></span>
+      </label>
+      <div class="qz-fit-body" id="optFitBody">
+        <span class="qz-fit-label">Apply to</span>
+        <fieldset class="qz-segment qz-segment-sm" id="optFitSides" aria-label="Overflow sizing applies to">
+          <label><input type="radio" name="optFitSides" value="front"><span>Front</span></label>
+          <label><input type="radio" name="optFitSides" value="back"><span>Back</span></label>
+          <label><input type="radio" name="optFitSides" value="both"><span>Both</span></label>
+        </fieldset>
+        <label class="qz-fit-label" for="optFitFloor">Limit</label>
+        <span class="qz-fit-limit">
+          <input type="range" id="optFitFloor" min="50" max="90" step="5">
+          <output id="optFitFloorOut"></output>
+        </span>
+      </div>
+    </div>
 
     <h3 class="qz-opt-head">Learn and Write</h3>
     <fieldset class="qz-segment qz-segment-3">

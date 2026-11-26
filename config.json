@@ -30,7 +30,8 @@
         "clock_minutes": 25,
         "search_in": "",
         "fit_text": true,
-        "fit_floor": 70
+        "fit_floor": 70,
+        "fit_sides": "both"
     },
     "tag_name": "quizlet::still-learning"
 }

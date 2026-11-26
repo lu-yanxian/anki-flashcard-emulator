@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.20
+
+- **Overflow sizing** can now be applied to just the front, just the back, or both sides.
+- Its settings are grouped in their own small panel under the text size sliders: the switch, **Apply to** (Front / Back / Both) and **Limit**.
+
 ## v1.19
 
 - **Overflow sizing.** In Flashcards, a side whose text would run onto a second line at your chosen size is sized down until each line fits, but not below a limit you set (70% of your chosen size by default; anywhere from 50% to 90%). Other cards keep the size you set. The switch and its limit slider sit under the text size sliders in Options; it's on by default.
