@@ -15,6 +15,7 @@ Most of these are set from the add-on's own windows, so you rarely need to edit 
 - `study.add_from`: where Add 5, 10 and 20 in the card picker (and "Add cards" at the end of a round) start: `"last"` (after the last chosen card, the default) or `"start"` (the top of the deck).
 - `study.clock_visible`: whether the running timer and stopwatch show their times in the top bar (`true`, the default). When `false` they keep running out of sight (the **Hide** switch).
 - `study.clock_minutes`: the timer length last chosen, in minutes (default `25`).
+- `study.search_in`: what the card picker's search looks in: `""` for both sides (the default), `"front"`, `"back"`, `"tags"`, or the name of a note field such as `"field:Pinyin"`.
 - `study.mode`: `"flashcards"`, `"learn"`, `"write"` or `"match"`, the mode the window opens in (it remembers the last one you used).
 - `study.front_size` / `study.back_size`: the default text sizes (60–500%) for decks you haven't adjusted. Sizes changed in Options are saved for that deck only (`user_files/<profile>/deck_sizes.json`).
 - `study.start_side`: `"front"` or `"back"`, whichever is shown first. In Learn and Write it's the side you're asked about; you answer with the other one.

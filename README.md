@@ -17,7 +17,7 @@ Studying here never changes Anki's scheduling. Reviews, due dates and stats stay
 
 ## Choosing cards
 
-The card picker lets you tick individual cards, filter by text, or use **Add 5**, **Add 10**, **Add 20**, **Add starred**, **Add trouble cards** (cards you keep missing) and **Add all shown**. Shift-click selects a range. The selection is remembered per deck.
+The card picker lets you tick individual cards, search them (on both sides, one side, a single note field such as Pinyin, or tags; accents and capitals don't matter), or use **Add 5**, **Add 10**, **Add 20**, **Add starred**, **Add trouble cards** (cards you keep missing) and **Add all shown**. Shift-click selects a range. The selection is remembered per deck.
 
 Add 5, 10 and 20 pick up after the last card you chose, so it's easy to work through a section in the middle of a deck; a small switch next to the buttons makes them add from the start of the deck instead. The pencil button on each row opens that card in Anki's Browse window.
 

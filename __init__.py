@@ -86,6 +86,7 @@ DEFAULTS: dict[str, Any] = {
         "add_from": "last",
         "clock_visible": True,
         "clock_minutes": 25,
+        "search_in": "",
     },
 }
 

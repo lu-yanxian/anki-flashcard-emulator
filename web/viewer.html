@@ -134,7 +134,15 @@
         <span class="qz-select-count" id="qzSelCount" aria-live="polite"></span>
       </div>
       <div class="qz-select-tools">
-        <input type="search" id="qzSelFilter" placeholder="Filter by text on either side" aria-label="Filter cards by text">
+        <div class="qz-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l5 5"/></svg>
+          <input type="search" id="qzSelFilter" placeholder="Search both sides" aria-label="Search cards">
+          <label class="qz-search-in" title="Where to search">
+            <span class="qz-search-in-text" id="qzSearchInText">Both sides</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>
+            <select id="qzSearchIn" aria-label="Where to search"></select>
+          </label>
+        </div>
         <label class="qz-chip"><input type="checkbox" id="qzSelOnly"><span>Selected only</span></label>
       </div>
       <div class="qz-select-actions">

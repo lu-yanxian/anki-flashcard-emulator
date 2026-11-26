@@ -994,17 +994,57 @@ html.night-mode body { background: #11141f; }
 .qz-select-count { color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
 
 .qz-select-tools { display: flex; gap: 10px; align-items: center; }
-.qz-select-tools input[type="search"] {
+.qz-search {
   flex: 1;
   min-width: 0;
-  font: inherit;
-  color: var(--ink);
+  display: flex;
+  align-items: center;
   background: var(--surface);
   border: 1.5px solid var(--line);
   border-radius: var(--radius-ctl);
-  padding: 8px 12px;
+  transition: border-color 0.15s;
 }
-.qz-select-tools input[type="search"]:focus { outline: none; border-color: var(--accent); }
+.qz-search:focus-within { border-color: var(--accent); }
+.qz-search > svg { width: 17px; height: 17px; margin-left: 11px; color: var(--muted); }
+.qz-search input[type="search"] {
+  flex: 1;
+  width: 0;           /* let flex size it, so a narrow window doesn't widen the picker */
+  min-width: 0;
+  font: inherit;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  padding: 8px 10px 8px 8px;
+  outline: none;
+}
+.qz-search input[type="search"]::placeholder { color: var(--muted); opacity: 0.85; }
+/* the field picker: a native select laid invisibly over its own label */
+.qz-search-in {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  align-self: stretch;
+  padding: 0 8px 0 12px;
+  border-left: 1.5px solid var(--line);
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 0;
+  max-width: 10em;
+}
+.qz-search-in:hover { color: var(--ink); }
+.qz-search-in.set { color: var(--accent); }
+.qz-search-in-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qz-search-in svg { width: 16px; height: 16px; }
+.qz-search-in select {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  opacity: 0; cursor: pointer; font: inherit;
+  color: var(--ink); background: var(--surface);
+}
+.qz-search-in:has(select:focus-visible) { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 0 var(--radius-ctl) var(--radius-ctl) 0; }
 
 .qz-chip { display: inline-flex; cursor: pointer; }
 .qz-chip input { position: absolute; opacity: 0; pointer-events: none; }

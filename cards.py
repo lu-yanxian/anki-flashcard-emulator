@@ -14,6 +14,7 @@ from anki.cards import Card
 from anki.collection import Collection, SearchNode
 from anki.consts import MODEL_CLOZE
 from anki.sound import AV_REF_RE, SoundOrVideoTag
+from anki.utils import strip_html_media
 
 # Anki's divider between the repeated front and the answer: <hr id=answer>,
 # with or without quotes and possibly with other attributes
@@ -93,6 +94,11 @@ def _answer_only(answer: str, question: str) -> str:
     return answer
 
 
+def _search_text(html: str) -> str:
+    text = strip_html_media(_strip_cloze(html)).replace("&nbsp;", " ")
+    return re.sub(r"\s+", " ", text).strip()
+
+
 def _visible(html: str) -> bool:
     return bool(re.sub(r"<[^>]+>|&nbsp;|\s", "", html)) or "<img" in html.lower()
 
@@ -144,6 +150,9 @@ def card_payload(
         "aLabel": a_label,
         "qAudio": bool(q_audio),
         "aAudio": bool(a_audio),
+        # plain text of each note field and the tags, for searching in the card picker
+        "fields": {name: _search_text(note[name]) for name in keys},
+        "tags": " ".join(note.tags),
     }
     return data, {"q": q_audio, "a": a_audio}, used_fields
 

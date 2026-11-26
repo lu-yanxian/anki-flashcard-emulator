@@ -40,7 +40,7 @@
   const settings = Object.assign(
     { shuffle: false, start_side: "front", track_progress: true, starred_only: false, front_size: 180, back_size: 140,
       mode: "flashcards", match_pairs: 6, choose_on_open: true, autoplay_audio: false,
-      learn_types: "both", any_line: true, auto_advance: true, tag_still_learning: false, track_stats: true, add_from: "last", clock_visible: true, clock_minutes: 25, theme: "classic", effects: {}, sapporo_dark: false },
+      learn_types: "both", any_line: true, auto_advance: true, tag_still_learning: false, track_stats: true, add_from: "last", clock_visible: true, clock_minutes: 25, search_in: "", theme: "classic", effects: {}, sapporo_dark: false },
     DATA.settings || {},
     DATA.deckSizes || {} // text sizes saved for this deck win over the general ones
   );
@@ -1709,14 +1709,79 @@
       : "All " + cards.length + " cards";
   }
 
+  // Search text is folded so typing is forgiving: case and accents are
+  // ignored (mingtian finds míngtiān) and traditional characters match
+  // simplified ones.
+  const foldHanzi = window.QZ_HANZI_FOLD || ((t) => t);
+  function foldText(text) {
+    return foldHanzi(String(text).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase())
+      .replace(/\s+/g, " ");
+  }
+
+  // Where the search looks: both sides, one side, the tags, or one note field.
+  function searchOptions() {
+    const opts = [["", "Both sides"], ["front", "Front"], ["back", "Back"]];
+    const names = [];
+    cards.forEach((c) => Object.keys(c.fields || {}).forEach((n) => { if (!names.includes(n)) names.push(n); }));
+    names.forEach((n) => opts.push(["field:" + n, n]));
+    if (cards.some((c) => c.tags)) opts.push(["tags", "Tags"]);
+    return { opts, names };
+  }
+
   function cardText(i) {
-    if (!picker.texts) {
+    const key = settings.search_in || "";
+    if (!picker.texts || picker.textsKey !== key) {
       const parser = new DOMParser();
       const plain = (html) => (parser.parseFromString(html, "text/html").body.textContent || "");
-      picker.texts = cards.map((c) => (plain(c.q) + " " + plain(c.a)).normalize("NFC").toLowerCase());
+      picker.texts = cards.map((c) => {
+        if (key === "front") return foldText(plain(c.q));
+        if (key === "back") return foldText(plain(c.a));
+        if (key === "tags") return foldText(c.tags || "");
+        if (key.startsWith("field:")) return foldText((c.fields || {})[key.slice(6)] || "");
+        return foldText(plain(c.q) + " " + plain(c.a));
+      });
+      picker.textsKey = key;
     }
     return picker.texts[i];
   }
+
+  const searchIn = $("qzSearchIn"), searchInText = $("qzSearchInText");
+  function buildSearchIn() {
+    const { opts, names } = searchOptions();
+    searchIn.innerHTML = "";
+    const add = (parent, [value, label]) => {
+      const o = document.createElement("option");
+      o.value = value;
+      o.textContent = label;
+      parent.appendChild(o);
+    };
+    opts.slice(0, 3).forEach((o) => add(searchIn, o));
+    if (names.length) {
+      const g = document.createElement("optgroup");
+      g.label = "Note fields";
+      opts.slice(3, 3 + names.length).forEach((o) => add(g, o));
+      searchIn.appendChild(g);
+    }
+    opts.slice(3 + names.length).forEach((o) => add(searchIn, o));
+    if (!opts.some(([v]) => v === (settings.search_in || ""))) settings.search_in = "";
+    syncSearchIn();
+  }
+  function syncSearchIn() {
+    const key = settings.search_in || "";
+    searchIn.value = key;
+    const label = searchIn.selectedOptions[0] ? searchIn.selectedOptions[0].textContent : "Both sides";
+    searchInText.textContent = label;
+    searchIn.parentElement.classList.toggle("set", key !== "");
+    els.selFilter.placeholder = key === "" ? "Search both sides"
+      : key === "tags" ? "Search tags" : "Search " + (key === "front" || key === "back" ? "the " + label.toLowerCase() : label);
+  }
+  searchIn.addEventListener("change", () => {
+    settings.search_in = searchIn.value;
+    saveSettings();
+    syncSearchIn();
+    applyFilter();
+    els.selFilter.focus();
+  });
 
   function renderRow(i) {
     const row = picker.rows[i];
@@ -1777,6 +1842,7 @@
     frag.appendChild(empty);
     els.selList.appendChild(frag);
     picker.built = true;
+    buildSearchIn();
   }
 
   function paintRow(i) {
@@ -1794,7 +1860,7 @@
   }
 
   function applyFilter() {
-    const q = els.selFilter.value.normalize("NFC").toLowerCase().trim();
+    const q = foldText(els.selFilter.value).trim();
     const onlySel = els.selOnly.checked;
     let shown = 0;
     picker.rows.forEach((r, i) => {
@@ -1804,7 +1870,7 @@
     });
     const empty = $("qzSelEmpty");
     empty.hidden = shown > 0;
-    empty.textContent = onlySel && !q ? "No cards selected yet. Use Add 10 or tick cards to start." : "No cards match this filter.";
+    empty.textContent = onlySel && !q ? "No cards selected yet. Use Add 10 or tick cards to start." : "No cards match this search.";
     picker.filtered = !!q || onlySel;
     updatePickerChrome();
   }

@@ -27,7 +27,8 @@
         "track_stats": true,
         "add_from": "last",
         "clock_visible": true,
-        "clock_minutes": 25
+        "clock_minutes": 25,
+        "search_in": ""
     },
     "tag_name": "quizlet::still-learning"
 }

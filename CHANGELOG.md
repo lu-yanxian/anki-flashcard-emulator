@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.18
+
+- **Card picker search.** The filter box is now a search box with a dropdown for where to look: both sides, the front, the back, any of the deck's note fields (such as Pinyin or English), or tags. Searching ignores accents and capitals (`mingtian` finds míngtiān) and matches traditional characters to simplified ones. The choice is remembered.
+
 ## v1.17
 
 - **Timer:** when time's up, the Timer button now blinks red instead of wiggling. With reduced motion turned on in your system, it stays red instead.
