@@ -87,6 +87,8 @@ DEFAULTS: dict[str, Any] = {
         "clock_visible": True,
         "clock_minutes": 25,
         "search_in": "",
+        "fit_text": True,
+        "fit_floor": 70,
     },
 }
 

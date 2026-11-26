@@ -1271,6 +1271,14 @@ html.night-mode body { background: #11141f; }
 .qz-range label { display: flex; justify-content: space-between; font-weight: 600; }
 .qz-range output { color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 500; }
 .qz-range input { width: 100%; accent-color: var(--accent); }
+.qz-fitrow { display: flex; align-items: center; gap: 10px; margin-top: -4px; }
+.qz-switch-sm { align-items: center; gap: 8px; flex: none; }
+.qz-switch-sm input { scale: 0.75; margin: -3px -5px; }
+.qz-switch-sm .qz-switch-text b { font-size: 13.5px; font-weight: 600; }
+.qz-fitrow-limit { flex: none; min-width: 0; display: flex; align-items: center; gap: 8px; transition: opacity 0.15s; }
+.qz-fitrow-limit input { width: 110px; height: 16px; margin: 0; accent-color: var(--accent); }
+.qz-fitrow-limit output { width: 4ch; text-align: right; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.qz-fitrow-limit.off { opacity: 0.35; pointer-events: none; }
 .qz-opt-note { margin: -6px 0 0; font-size: 12px; color: var(--muted); }
 
 .qz-keys {

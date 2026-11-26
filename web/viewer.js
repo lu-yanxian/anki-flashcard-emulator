@@ -40,7 +40,7 @@
   const settings = Object.assign(
     { shuffle: false, start_side: "front", track_progress: true, starred_only: false, front_size: 180, back_size: 140,
       mode: "flashcards", match_pairs: 6, choose_on_open: true, autoplay_audio: false,
-      learn_types: "both", any_line: true, auto_advance: true, tag_still_learning: false, track_stats: true, add_from: "last", clock_visible: true, clock_minutes: 25, search_in: "", theme: "classic", effects: {}, sapporo_dark: false },
+      learn_types: "both", any_line: true, auto_advance: true, tag_still_learning: false, track_stats: true, add_from: "last", clock_visible: true, clock_minutes: 25, search_in: "", fit_text: true, fit_floor: 70, theme: "classic", effects: {}, sapporo_dark: false },
     DATA.settings || {},
     DATA.deckSizes || {} // text sizes saved for this deck win over the general ones
   );
@@ -104,7 +104,9 @@
       // or Chrome paints an opaque backdrop behind the card
       ".qz-cardframe{display:block;width:100%;height:48px;border:0;background:transparent;color-scheme:" +
       (DATA.night ? "dark" : "light") + "}";
-    css += ".card{color:inherit}"; // the card takes the ink of whatever holds it (see --card-ink)
+    css += ".card{color:inherit}";
+    css += ".qz-measure{width:max-content!important;max-width:none!important}" +
+      ".qz-measure,.qz-measure *{white-space:nowrap!important}"; // the card takes the ink of whatever holds it (see --card-ink)
     return css;
   }
   let OVERRIDE = overrideCss();
@@ -426,14 +428,47 @@
     }, 300);
   }
 
+  // "Fit long text": when a side's text would wrap at the chosen size, size
+  // that face down until its longest line fits, but never below the set limit (70% unless changed) of
+  // the chosen size (past that, the text wraps as usual).
+  function fitFace(root, host, size) {
+    const el = root.querySelector(".card");
+    if (!el || !settings.fit_text) return; // framed cards (scripts, MathJax) keep their size
+    const box = host.parentElement; // the face body: the width the text can use
+    const cs = getComputedStyle(box);
+    const scaleX = box.getBoundingClientRect().width / (box.offsetWidth || 1); // any transform on the way
+    const avail = (box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) * scaleX;
+    if (!(avail > 0)) return;
+    el.style.zoom = "1";
+    el.classList.add("qz-measure");
+    const natural = el.getBoundingClientRect().width; // the longest line, unwrapped, at 100%
+    el.classList.remove("qz-measure");
+    const want = size / 100;
+    const fit = natural > 0 ? (avail * 0.95) / natural : want; // keep a little breathing room
+    el.style.zoom = String(fit >= want ? want : Math.max(fit, want * fitFloor()));
+  }
+  function fitFloor() {
+    const f = Number(settings.fit_floor);
+    return (f >= 50 && f <= 90 ? f : 70) / 100;
+  }
+  function showFaces(card) {
+    const s = sides(card);
+    const fs = settings.start_side === "back" ? settings.back_size : settings.front_size;
+    const bs = settings.start_side === "back" ? settings.front_size : settings.back_size;
+    renderFace(frontRoot, card, s.front.html, fs, true);
+    renderFace(backRoot, card, s.back.html, bs, true);
+    fitFace(frontRoot, els.frontHost, fs);
+    fitFace(backRoot, els.backHost, bs);
+    return s;
+  }
+
   function renderCard(kind) {
     const card = currentCard();
     if (!card) return;
     const s = sides(card);
     els.shell.style.visibility = "";
     setFlipped(false, false);
-    renderFace(frontRoot, card, s.front.html, settings.start_side === "back" ? settings.back_size : settings.front_size, true);
-    renderFace(backRoot, card, s.back.html, settings.start_side === "back" ? settings.front_size : settings.back_size, true);
+    showFaces(card);
     els.frontLabel.textContent = s.front.label;
     els.backLabel.textContent = s.back.label;
     document.querySelectorAll(".qz-face .qz-audio").forEach((b) => {
@@ -980,6 +1015,11 @@
     els.optBackSize.value = settings.back_size;
     els.optFrontSizeOut.textContent = settings.front_size + "%";
     els.optBackSizeOut.textContent = settings.back_size + "%";
+    $("optFitText").checked = settings.fit_text !== false;
+    $("optFitFloor").value = Math.round(fitFloor() * 100);
+    $("optFitFloorOut").textContent = Math.round(fitFloor() * 100) + "%";
+    $("optFitFloorRow").classList.toggle("off", settings.fit_text === false);
+    $("optFitFloor").disabled = settings.fit_text === false;
     updateStarNote();
   }
 
@@ -987,9 +1027,7 @@
     const card = currentCard();
     if (!card) return;
     const keepFlipped = state.flipped;
-    const s = sides(card);
-    renderFace(frontRoot, card, s.front.html, settings.start_side === "back" ? settings.back_size : settings.front_size, true);
-    renderFace(backRoot, card, s.back.html, settings.start_side === "back" ? settings.front_size : settings.back_size, true);
+    showFaces(card);
     setFlipped(keepFlipped, false);
   }
 
@@ -1047,6 +1085,27 @@
       });
     }
   );
+  $("optFitText").addEventListener("change", (e) => {
+    settings.fit_text = e.target.checked;
+    $("optFitFloorRow").classList.toggle("off", !e.target.checked);
+    $("optFitFloor").disabled = !e.target.checked;
+    saveSettings();
+    rescale();
+  });
+  $("optFitFloor").addEventListener("input", (e) => {
+    settings.fit_floor = Number(e.target.value);
+    $("optFitFloorOut").textContent = e.target.value + "%";
+    rescale();
+  });
+  $("optFitFloor").addEventListener("change", saveSettings);
+  { // refit when the window changes size
+    let t = 0;
+    window.addEventListener("resize", () => {
+      clearTimeout(t);
+      t = setTimeout(() => { if (settings.fit_text && currentCard() && settings.mode === "flashcards") rescale(); }, 120);
+    });
+  }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (settings.fit_text && currentCard()) rescale(); });
   els.restart.addEventListener("click", () => {
     const m = settings.mode;
     if (m === "flashcards") restart();

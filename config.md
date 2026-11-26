@@ -16,6 +16,8 @@ Most of these are set from the add-on's own windows, so you rarely need to edit 
 - `study.clock_visible`: whether the running timer and stopwatch show their times in the top bar (`true`, the default). When `false` they keep running out of sight (the **Hide** switch).
 - `study.clock_minutes`: the timer length last chosen, in minutes (default `25`).
 - `study.search_in`: what the card picker's search looks in: `""` for both sides (the default), `"front"`, `"back"`, `"tags"`, or the name of a note field such as `"field:Pinyin"`.
+- `study.fit_text`: Overflow sizing. When `true` (the default), a flashcard side whose text would run onto a second line is sized down until it fits, but no further than `study.fit_floor`.
+- `study.fit_floor`: the smallest Overflow sizing may go, as a percentage of the chosen text size, from 50 to 90 (default 70).
 - `study.mode`: `"flashcards"`, `"learn"`, `"write"` or `"match"`, the mode the window opens in (it remembers the last one you used).
 - `study.front_size` / `study.back_size`: the default text sizes (60–500%) for decks you haven't adjusted. Sizes changed in Options are saved for that deck only (`user_files/<profile>/deck_sizes.json`).
 - `study.start_side`: `"front"` or `"back"`, whichever is shown first. In Learn and Write it's the side you're asked about; you answer with the other one.

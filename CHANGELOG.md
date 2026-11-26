@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.19
+
+- **Overflow sizing.** In Flashcards, a side whose text would run onto a second line at your chosen size is sized down until each line fits, but not below a limit you set (70% of your chosen size by default; anywhere from 50% to 90%). Other cards keep the size you set. The switch and its limit slider sit under the text size sliders in Options; it's on by default.
+
 ## v1.18
 
 - **Card picker search.** The filter box is now a search box with a dropdown for where to look: both sides, the front, the back, any of the deck's note fields (such as Pinyin or English), or tags. Searching ignores accents and capitals (`mingtian` finds míngtiān) and matches traditional characters to simplified ones. The choice is remembered.
